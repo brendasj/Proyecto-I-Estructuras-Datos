@@ -13,9 +13,9 @@ class Visualizador:
 
         # Cargar imágenes desde la carpeta assets
         self.sprites = {
-            'C': pygame.image.load(os.path.join("assets", "calle.png")),
-            'B': pygame.image.load(os.path.join("assets", "edificio.png")),
-            'P': pygame.image.load(os.path.join("assets", "parque.png"))
+            'C': pygame.image.load(os.path.join("Proyecto-I-Estructuras-Datos", "assets", "calle.png")),
+            'B': pygame.image.load(os.path.join("Proyecto-I-Estructuras-Datos", "assets", "edificio.png")),
+            'P': pygame.image.load(os.path.join("Proyecto-I-Estructuras-Datos", "assets", "parque.png"))
         }
 
     def dibujar(self):
@@ -27,6 +27,8 @@ class Visualizador:
                 if event.type == pygame.QUIT:
                     running = False
 
+            self.screen.fill((255, 255, 255))
+            
             # Dibujar cada celda del mapa
             for y, fila in enumerate(matriz):
                 for x, celda in enumerate(fila):
