@@ -16,6 +16,8 @@ class Mapa:
         self.grid = data.get('tiles')
         self.legend = data.get('legend', {})
 
+        self.grid = self.procesar_cuadricula()
+
         # Validaciones adicionales
         if self.width is None or self.height is None:
             raise ValueError("El mapa no tiene dimensiones válidas (width/height).")
@@ -74,4 +76,46 @@ class Mapa:
                     matriz = np.array(list(grid_completo)).reshape(height, width)
 
         return matriz
+    
+    def procesar_cuadricula(self):
+        nueva_cuadricula = [fila[:] for fila in self.grid]
+        visitado = [[False for _ in range(self.width)] for _ in range(self.height)]
+        
+        for y in range(self.height):
+            for x in range(self.width):
+                if nueva_cuadricula[y][x] == 'B' and not visitado[y][x]:
+                    # Encontramos la esquina superior izquierda de un bloque de edificios
+                    
+                    # Encontrar el ancho del bloque
+                    ancho_bloque = 0
+                    while (x + ancho_bloque < self.width and 
+                        nueva_cuadricula[y][x + ancho_bloque] == 'B' and 
+                        not visitado[y][x + ancho_bloque]):
+                        ancho_bloque += 1
+                    
+                    # Encontrar el alto del bloque
+                    alto_bloque = 0
+                    while (y + alto_bloque < self.height and 
+                        nueva_cuadricula[y + alto_bloque][x] == 'B' and 
+                        not visitado[y + alto_bloque][x]):
+                        alto_bloque += 1
+                    
+                    # Verificar si es un bloque rectangular válido
+                    es_rectangulo = True
+                    for i in range(alto_bloque):
+                        for j in range(ancho_bloque):
+                            if nueva_cuadricula[y + i][x + j] != 'B' or visitado[y + i][x + j]:
+                                es_rectangulo = False
+                                break
+                        if not es_rectangulo:
+                            break
 
+                    if es_rectangulo:
+                        # Marcar el bloque
+                        nueva_cuadricula[y][x] = f'B_({ancho_bloque}x{alto_bloque})'
+                        for i in range(alto_bloque):
+                            for j in range(ancho_bloque):
+                                visitado[y + i][x + j] = True
+                                if i != 0 or j != 0:
+                                    nueva_cuadricula[y + i][x + j] = ' '
+        return nueva_cuadricula
