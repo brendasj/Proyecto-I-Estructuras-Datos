@@ -7,7 +7,7 @@ class Trabajador:
         self.mapa_height = mapa_height
         self.cell_size = cell_size
 
-        self.trabajador_original = pygame.image.load(os.path.join("Proyecto-I-Estructuras-Datos", "assets", "trabajador.png"))
+        self.trabajador_original = pygame.image.load(os.path.join("assets", "trabajador.png"))
         self.trabajador = pygame.transform.scale(self.trabajador_original, (100, 100))
         self.trabajadorRect = self.trabajador.get_rect()
 

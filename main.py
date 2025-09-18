@@ -3,39 +3,37 @@ from api_client import ApiClient
 from mapa import Mapa
 from visualizador import Visualizador
 from trabajador import Trabajador
-from datos_clima import Clima
-from datos_trabajos import Trabajo
+from datos_clima import ClimaMarkov
+from datos_trabajos import Pedido
 
 def main():
     pygame.init()
     
     params = {
-        "width": 30,
-        "height": 30,
+        "width": 17,
+        "height": 27,
         "types": ["B", "P", "C"],
         "city_name": "TigerCity",
         "goal": 1500
     }
-    cell_size = 32
+    cell_size = 22
 
     client = ApiClient()
     datos = client.obtener_mapa(params)
-
-    # datos_clima = client.obtener_clima("Heredia")
-    # if datos_clima:
-    #     clima = Clima(datos_clima)
-    #     clima.mostrar()
-
-    # datos_trabajos = client.obtener_trabajos()
-    # if datos_trabajos:
-    #     for trabajo_json in datos_trabajos.get("jobs", []):
-    #         trabajo = Trabajo(trabajo_json)
-    #         trabajo.mostrar()
 
     if datos:
         mapa = Mapa(datos)
         visualizador = Visualizador(mapa, cell_size)
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
+        clima = ClimaMarkov("TigerCity")
+
+
+        datos_trabajos = client.obtener_trabajos()
+        pedidos = []
+        if datos_trabajos:
+          for datos in datos_trabajos.get("data", []):
+            pedido = Pedido(datos) 
+            pedidos.append(pedido)
 
         running = True
         while running:
@@ -46,10 +44,13 @@ def main():
             keys = pygame.key.get_pressed()
             trabajador.mover(keys)
             
+            clima.actualizar()  
+
             # Limpiar y dibujar
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
+            visualizador.dibujar_panel_lateral(clima, pedidos, resistencia=85, reputacion=72)
             
             pygame.display.flip()
     else:
