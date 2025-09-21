@@ -63,7 +63,7 @@ class Visualizador:
 
         # Resistencia
         if resistencia is not None:
-            texto_res = f"Resistencia: {resistencia}/100"
+            texto_res = f"Resistencia: {resistencia:.2f}/100."
             self.screen.blit(font_contenido.render(texto_res, True, color_texto), (x_panel + margen, y_actual))
             y_actual += 24
 
