@@ -19,7 +19,10 @@ class Pedido:
     def tiempo_restante(self, tiempo_actual):
         delta = self.deadline - tiempo_actual
         return max(int(delta.total_seconds() // 60), 0)
-
+    
+    def getPeso(self):
+        return self.weight
+    
     def mostrar(self):
         print(f"[{self.id}] ${self.payout} | P:{self.priority} | W:{self.weight}")
         print(f"Pickup: {self.pickup} → Dropoff: {self.dropoff}")
