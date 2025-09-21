@@ -1,11 +1,10 @@
 import pygame
-import time
 from api_client import ApiClient
 from mapa import Mapa
 from visualizador import Visualizador
 from trabajador import Trabajador
 from datos_clima import ClimaMarkov
-from datos_trabajos import Pedido
+from pedidos import Pedidos
 
 def main():
     pygame.init()
@@ -28,16 +27,18 @@ def main():
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
         clima = ClimaMarkov("TigerCity")
 
+        pedidos = Pedidos(client)
+        pedidos.procesar_pedidos()
 
-        datos_trabajos = client.obtener_trabajos()
-        pedidos = []
-        if datos_trabajos:
-          for datos in datos_trabajos.get("data", []):
-            pedido = Pedido(datos) 
-            pedidos.append(pedido)
+        # datos_trabajos = client.obtener_trabajos()
+        # pedidos = []
+        # if datos_trabajos:
+          # for datos in datos_trabajos.get("data", []):
+            # pedido = Pedido(datos) 
+            # pedidos.append(pedido)
 
         clock = pygame.time.Clock()
-        
+
         running = True
         while running:
             dt = clock.tick(60) / 1000.0
@@ -55,7 +56,7 @@ def main():
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, pedidos, resistencia=trabajador.resistencia, reputacion=72)
+            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), resistencia=trabajador.resistencia, reputacion=72)
             
             pygame.display.flip()
     else:
