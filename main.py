@@ -1,4 +1,5 @@
 import pygame
+import time
 from api_client import ApiClient
 from mapa import Mapa
 from visualizador import Visualizador
@@ -35,22 +36,26 @@ def main():
             pedido = Pedido(datos) 
             pedidos.append(pedido)
 
+        clock = pygame.time.Clock()
+        
         running = True
         while running:
+            dt = clock.tick(60) / 1000.0
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
             keys = pygame.key.get_pressed()
-            trabajador.mover(keys)
+            trabajador.mover(keys, clima, dt)
             
-            clima.actualizar()  
+            clima.actualizar() 
 
             # Limpiar y dibujar
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, pedidos, resistencia=85, reputacion=72)
+            visualizador.dibujar_panel_lateral(clima, pedidos, resistencia=trabajador.resistencia, reputacion=72)
             
             pygame.display.flip()
     else:
