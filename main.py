@@ -30,13 +30,6 @@ def main():
         pedidos = Pedidos(client)
         pedidos.procesar_pedidos()
 
-        # datos_trabajos = client.obtener_trabajos()
-        # pedidos = []
-        # if datos_trabajos:
-          # for datos in datos_trabajos.get("data", []):
-            # pedido = Pedido(datos) 
-            # pedidos.append(pedido)
-
         clock = pygame.time.Clock()
 
         running = True
@@ -56,7 +49,7 @@ def main():
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), resistencia=trabajador.resistencia, reputacion=72)
+            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.peso_total, resistencia=trabajador.resistencia, reputacion=72)
             
             pygame.display.flip()
     else:
