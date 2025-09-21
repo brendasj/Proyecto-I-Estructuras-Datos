@@ -40,7 +40,7 @@ class Visualizador:
                     sprite_grande = self.sprites_grandes.get(celda)
                     self.screen.blit(sprite_grande, (x * self.cell_size, y * self.cell_size))
 
-    def dibujar_panel_lateral(self, clima, pedidos, resistencia=None, reputacion=None):
+    def dibujar_panel_lateral(self, clima, pedidos, peso, resistencia=None, reputacion=None):
         x_panel = self.mapa.width * self.cell_size
         y_panel = 0
         alto_total = self.mapa.height * self.cell_size
@@ -81,6 +81,11 @@ class Visualizador:
             texto = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority} | {pedido.deadline.strftime('%H:%M')}"
             self.screen.blit(font_contenido.render(texto, True, color_texto), (x_panel + margen, y_actual))
             y_actual += 22
+
+        # Peso
+        texto_rep = f"Peso: {peso}"
+        self.screen.blit(font_titulo.render(texto_rep, True, color_texto), (x_panel + margen, y_actual))
+        y_actual += 28
 
     # Estas funciones quedan opcionales si ya usás dibujar_panel_lateral
     def mostrar_info_clima(self, clima):
