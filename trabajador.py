@@ -1,14 +1,15 @@
 import pygame
 import os
+from inventario import Inventario
 
 class Trabajador:
-    def __init__(self, mapa_width, mapa_height, cell_size=32):
+    def __init__(self, mapa_width, mapa_height, cell_size=32, peso_maximo = 10):
         self.mapa_width = mapa_width
         self.mapa_height = mapa_height
         self.cell_size = cell_size
 
         self.resistencia = 100
-        self.peso_total = 0
+        self.inventario = Inventario(peso_maximo)
 
         self.trabajador_original = pygame.image.load(os.path.join("assets", "trabajador.png"))
         self.trabajador = pygame.transform.scale(self.trabajador_original, (100, 100))
@@ -58,7 +59,7 @@ class Trabajador:
         base = 0.5 * dt
 
         peso = 0
-        if self.peso_total > 3:
+        if self.inventario.peso_actual > 3:
             peso = 0.2 * dt
         
         efecto_clima = {

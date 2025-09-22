@@ -49,7 +49,7 @@ def main():
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.peso_total, resistencia=trabajador.resistencia, reputacion=72)
+            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.inventario.peso_actual, resistencia=trabajador.resistencia, reputacion=72)
             
             pygame.display.flip()
     else:
