@@ -24,7 +24,7 @@ def main():
     if datos:
         mapa = Mapa(datos)
         visualizador = Visualizador(mapa, cell_size)
-        trabajador = Trabajador(mapa.width, mapa.height, 72, cell_size)
+        trabajador = Trabajador(mapa.width, mapa.height, cell_size)
         clima = ClimaMarkov("TigerCity")
 
         pedidos = Pedidos(client)

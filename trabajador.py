@@ -3,13 +3,13 @@ import os
 from inventario import Inventario
 
 class Trabajador:
-    def __init__(self, mapa_width, mapa_height, reputacion, cell_size=32, peso_maximo = 10, velocidad_estandar = 3):
+    def __init__(self, mapa_width, mapa_height, cell_size=32, peso_maximo = 10, velocidad_estandar = 3):
         self.mapa_width = mapa_width
         self.mapa_height = mapa_height
         self.cell_size = cell_size
 
         self.resistencia = 100
-        self.reputacion = reputacion
+        self.reputacion = 70
         self.inventario = Inventario(peso_maximo)
 
         self.velocidad_estandar = velocidad_estandar
