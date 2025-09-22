@@ -24,7 +24,7 @@ def main():
     if datos:
         mapa = Mapa(datos)
         visualizador = Visualizador(mapa, cell_size)
-        trabajador = Trabajador(mapa.width, mapa.height, cell_size)
+        trabajador = Trabajador(mapa.width, mapa.height, 72, cell_size)
         clima = ClimaMarkov("TigerCity")
 
         pedidos = Pedidos(client)
@@ -41,7 +41,10 @@ def main():
                     running = False
 
             keys = pygame.key.get_pressed()
-            trabajador.mover(keys, clima, dt)
+
+            velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
+
+            trabajador.mover(keys, clima, dt, velocidad_actual)
             
             clima.actualizar() 
 
@@ -49,7 +52,7 @@ def main():
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.inventario.peso_actual, resistencia=trabajador.resistencia, reputacion=72)
+            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.inventario.peso_actual, velocidad_actual, resistencia=trabajador.resistencia, reputacion = trabajador.reputacion)
             
             pygame.display.flip()
     else:
