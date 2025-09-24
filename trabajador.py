@@ -15,7 +15,7 @@ class Trabajador:
         self.velocidad_estandar = velocidad_estandar
 
         self.trabajador_original = pygame.image.load(os.path.join("assets", "trabajador.png"))
-        self.trabajador = pygame.transform.scale(self.trabajador_original, (80, 80))
+        self.trabajador = pygame.transform.scale(self.trabajador_original, (32, 32))
         self.trabajadorRect = self.trabajador.get_rect()
 
         # Poner al trabajador en una posición inicial

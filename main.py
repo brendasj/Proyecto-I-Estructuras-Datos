@@ -16,7 +16,7 @@ def main():
         "city_name": "TigerCity",
         "goal": 1500
     }
-    cell_size = 22
+    cell_size = 32
 
     client = ApiClient()
     datos = client.obtener_mapa(params)
