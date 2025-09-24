@@ -3,7 +3,7 @@ import os
 from inventario import Inventario
 
 class Trabajador:
-    def __init__(self, mapa_width, mapa_height, cell_size=32, peso_maximo = 10, velocidad_estandar = 3):
+    def __init__(self, mapa_width, mapa_height, cell_size, peso_maximo = 10, velocidad_estandar = 3):
         self.mapa_width = mapa_width
         self.mapa_height = mapa_height
         self.cell_size = cell_size
@@ -15,7 +15,7 @@ class Trabajador:
         self.velocidad_estandar = velocidad_estandar
 
         self.trabajador_original = pygame.image.load(os.path.join("assets", "trabajador.png"))
-        self.trabajador = pygame.transform.scale(self.trabajador_original, (80, 80))
+        self.trabajador = pygame.transform.scale(self.trabajador_original, (50, 50))
         self.trabajadorRect = self.trabajador.get_rect()
 
         # Poner al trabajador en una posición inicial
