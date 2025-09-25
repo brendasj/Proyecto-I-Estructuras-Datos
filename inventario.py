@@ -13,21 +13,21 @@ class Inventario:
         self.peso_actual = 0
     
     def agregar_pedido(self, pedido):
-        if self.peso_actual + pedido.getPeso() > self.peso_maximo:
+        if self.peso_actual + pedido.weight > self.peso_maximo:
             print("No se puede agregar el pedido, el peso maximo ha sido superado")
             return False
-        
-        nodo = Nodo(pedido)
-        if not self.head:
-            self.head = nodo
-            self.tail = nodo
         else:
-            self.tail.siguiente = nodo
-            nodo.anterior = self.tail
-            self.tail = nodo
-        
-        self.peso_actual += pedido.getPeso()
-        return True
+            nodo = Nodo(pedido)
+            if not self.head:
+                self.head = nodo
+                self.tail = nodo
+            else:
+                self.tail.siguiente = nodo
+                nodo.anterior = self.tail
+                self.tail = nodo
+            
+            self.peso_actual += pedido.getPeso()
+            return True
 
     def quitar_pedido(self, pedido_id):
         actual = self.head
