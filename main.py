@@ -1,4 +1,5 @@
 import pygame
+import heapq
 from api_client import ApiClient
 from mapa import Mapa
 from visualizador import Visualizador
@@ -32,27 +33,46 @@ def main():
 
         clock = pygame.time.Clock()
 
+        tiempo_juego = 0
+
         running = True
         while running:
             dt = clock.tick(60) / 1000.0
+            tiempo_juego += dt
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
+                # Lógica para aceptar/rechazar pedidos
+                if event.type == pygame.KEYDOWN:
+                    # Aceptar pedido
+                    if event.key == pygame.K_a:
+                        pedido_a_aceptar = pedidos.obtener_siguiente_pedido()
+                        if pedido_a_aceptar:
+                            if trabajador.inventario.agregar_pedido(pedido_a_aceptar):
+                                pedidos.aceptar_pedido()
+                            else:
+                                print("El inventario está lleno. No se puede aceptar más pedidos.")
+
+                    # Rechazar pedido
+                    if event.key == pygame.K_r:
+                        if pedidos.pedidos:
+                            pedidos.rechazar_pedido()
+                            print("Pedido rechazado")
+
             keys = pygame.key.get_pressed()
+            clima.actualizar() 
 
             velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
 
             trabajador.mover(keys, clima, dt, velocidad_actual)
-            
-            clima.actualizar() 
 
             # Limpiar y dibujar
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.inventario.peso_actual, velocidad_actual, resistencia=trabajador.resistencia, reputacion = trabajador.reputacion)
+            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.inventario.forward(), trabajador.inventario.peso_actual, velocidad_actual, resistencia=trabajador.resistencia, reputacion = trabajador.reputacion)
             
             pygame.display.flip()
     else:

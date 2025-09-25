@@ -13,7 +13,7 @@ class Inventario:
         self.peso_actual = 0
     
     def agregar_pedido(self, pedido):
-        if self.peso_actual + pedido.getPeso() < self.peso_maximo:
+        if self.peso_actual + pedido.getPeso() > self.peso_maximo:
             print("No se puede agregar el pedido, el peso maximo ha sido superado")
             return False
         
