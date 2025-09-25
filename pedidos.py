@@ -6,6 +6,7 @@ class Pedidos:
     def __init__(self, api_client: ApiClient):
         self.api = api_client
         self.pedidos = []
+        self.pedidos_aceptados = []
     
     def procesar_pedidos(self):
         datos = self.api.obtener_trabajos()
@@ -22,9 +23,20 @@ class Pedidos:
     
     def obtener_siguiente_pedido(self) -> Pedido:
         if self.pedidos:
-            prioridad, pedido = heapq.heappop(self.pedidos)
+            prioridad, indice, pedido = self.pedidos[0]
             return pedido
         return None
 
     def obtener_todos_los_pedidos(self) -> list[Pedido]:
         return [pedido for prioridad, indice, pedido in self.pedidos]
+    
+    def aceptar_pedido(self) -> Pedido:
+        if self.pedidos:
+            prioridad, indice, pedido = heapq.heappop(self.pedidos)
+            self.pedidos_aceptados.append(pedido)
+            return pedido
+        return None
+
+    def rechazar_pedido(self):
+        if self.pedidos:
+            prioridad, indice, pedido = heapq.heappop(self.pedidos)

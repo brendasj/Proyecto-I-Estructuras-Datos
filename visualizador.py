@@ -47,7 +47,7 @@ class Visualizador:
                     sprite_grande = self.sprites_grandes.get(celda)
                     self.screen.blit(sprite_grande, (x * self.cell_size, y * self.cell_size))
 
-    def dibujar_panel_lateral(self, clima, pedidos, peso, velocidad, resistencia=None, reputacion=None):
+    def dibujar_panel_lateral(self, clima, pedidos_disponible, pedidos_inventario, peso, velocidad, resistencia=None, reputacion=None):
         x_panel = self.mapa.width * self.cell_size
         y_panel = 0
         alto_total = self.mapa.height * self.cell_size
@@ -80,13 +80,25 @@ class Visualizador:
             self.screen.blit(font_contenido.render(texto_rep, True, color_texto), (x_panel + margen, y_actual))
             y_actual += 24
 
-        # Pedidos
-        self.screen.blit(font_titulo.render("Pedidos:", True, color_texto), (x_panel + margen, y_actual))
+        # Pedidos Disponibles 
+        self.screen.blit(font_titulo.render("Pedidos Disponibles:", True, color_texto), (x_panel + margen, y_actual))
         y_actual += 28
 
-        for pedido in pedidos:
-            texto = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority} | {pedido.deadline.strftime('%H:%M')}"
-            self.screen.blit(font_contenido.render(texto, True, color_texto), (x_panel + margen, y_actual))
+        if pedidos_disponible:
+            pedido = pedidos_disponible[0]
+            texto = f"Aceptar (A) | Rechazar (R)"
+            self.screen.blit(font_contenido.render(texto, True, (0, 0, 255)), (x_panel + margen, y_actual))
+            y_actual += 22
+            texto_pedido = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority}"
+            self.screen.blit(font_contenido.render(texto_pedido, True, (0, 0, 0)), (x_panel + margen, y_actual))
+            y_actual += 28
+
+        self.screen.blit(font_titulo.render("Pedidos en Inventario:", True, color_texto), (x_panel + margen, y_actual))
+        y_actual += 28
+
+        for pedido in pedidos_inventario:
+            texto = f"{pedido.id} | ${pedido.payout}"
+            self.screen.blit(font_contenido.render(texto, True, (0, 100, 0)), (x_panel + margen, y_actual))
             y_actual += 22
 
         # Peso
