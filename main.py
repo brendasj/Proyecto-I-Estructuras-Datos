@@ -1,5 +1,4 @@
 import pygame
-import heapq
 from api_client import ApiClient
 from mapa import Mapa
 from visualizador import Visualizador
@@ -34,6 +33,7 @@ def main():
         clock = pygame.time.Clock()
 
         tiempo_juego = 0
+        incluido = True
 
         running = True
         while running:
@@ -52,14 +52,14 @@ def main():
                         if pedido_a_aceptar:
                             if trabajador.inventario.agregar_pedido(pedido_a_aceptar):
                                 pedidos.aceptar_pedido()
+                                incluido = True
                             else:
-                                print("El inventario está lleno. No se puede aceptar más pedidos.")
+                                incluido = False
 
                     # Rechazar pedido
                     if event.key == pygame.K_r:
                         if pedidos.pedidos:
                             pedidos.rechazar_pedido()
-                            print("Pedido rechazado")
 
             keys = pygame.key.get_pressed()
             clima.actualizar() 
@@ -72,7 +72,7 @@ def main():
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.inventario.forward(), trabajador.inventario.peso_actual, velocidad_actual, resistencia=trabajador.resistencia, reputacion = trabajador.reputacion)
+            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.inventario.forward(), trabajador.inventario.peso_actual, incluido, velocidad_actual, resistencia=trabajador.resistencia, reputacion = trabajador.reputacion)
             
             pygame.display.flip()
     else:

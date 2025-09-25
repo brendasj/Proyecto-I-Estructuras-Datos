@@ -6,7 +6,7 @@ class Visualizador:
         pygame.init()
         self.mapa = mapa
         self.cell_size = cell_size
-        self.panel_lateral = 250  # ancho del panel lateral
+        self.panel_lateral = 270  # ancho del panel lateral
 
         # Ajustar tamaño de pantalla para incluir el panel lateral
         self.screen = pygame.display.set_mode(
@@ -47,7 +47,7 @@ class Visualizador:
                     sprite_grande = self.sprites_grandes.get(celda)
                     self.screen.blit(sprite_grande, (x * self.cell_size, y * self.cell_size))
 
-    def dibujar_panel_lateral(self, clima, pedidos_disponible, pedidos_inventario, peso, velocidad, resistencia=None, reputacion=None):
+    def dibujar_panel_lateral(self, clima, pedidos_disponible, pedidos_inventario, peso, incluido, velocidad, resistencia=None, reputacion=None):
         x_panel = self.mapa.width * self.cell_size
         y_panel = 0
         alto_total = self.mapa.height * self.cell_size
@@ -97,7 +97,7 @@ class Visualizador:
         y_actual += 28
 
         for pedido in pedidos_inventario:
-            texto = f"{pedido.id} | ${pedido.payout}"
+            texto = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority} | {pedido.pickup} | {pedido.dropoff}"
             self.screen.blit(font_contenido.render(texto, True, (0, 100, 0)), (x_panel + margen, y_actual))
             y_actual += 22
 
@@ -105,6 +105,10 @@ class Visualizador:
         texto_rep = f"Peso: {peso}"
         self.screen.blit(font_titulo.render(texto_rep, True, color_texto), (x_panel + margen, y_actual))
         y_actual += 28
+        if incluido == False:
+            texto = f"Peso máximo alcanzado"
+            self.screen.blit(font_contenido.render(texto, True, (0, 0, 255)), (x_panel + margen, y_actual))
+            y_actual += 22
 
         # Peso
         texto_rep = f"Velocidad: {velocidad:.2f}"
