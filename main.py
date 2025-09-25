@@ -73,6 +73,10 @@ def main():
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
             visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.inventario.forward(), trabajador.inventario.peso_actual, incluido, velocidad_actual, resistencia=trabajador.resistencia, reputacion = trabajador.reputacion)
+
+            for pedido_a_aceptar in trabajador.inventario.forward():
+                visualizador.resaltar_celda(pedido_a_aceptar.pickup[0], pedido_a_aceptar.pickup[1], color=(255, 165, 0, 100), texto=pedido_a_aceptar.id[4:])
+                visualizador.resaltar_celda(pedido_a_aceptar.dropoff[0], pedido_a_aceptar.dropoff[1], color=(0, 255, 0, 100), texto=pedido_a_aceptar.id[4:])
             
             pygame.display.flip()
     else:

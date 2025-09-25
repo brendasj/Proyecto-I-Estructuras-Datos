@@ -58,6 +58,7 @@ class Visualizador:
 
         font_titulo = pygame.font.SysFont("Arial", 20)
         font_contenido = pygame.font.SysFont("Arial", 16)
+        font_guia = pygame.font.SysFont("Arial", 16, bold=True)
         color_texto = (30, 30, 30)
 
         y_actual = 20
@@ -110,14 +111,34 @@ class Visualizador:
             self.screen.blit(font_contenido.render(texto, True, (0, 0, 255)), (x_panel + margen, y_actual))
             y_actual += 22
 
-        # Peso
+        # Velocidad
         texto_rep = f"Velocidad: {velocidad:.2f}"
         self.screen.blit(font_titulo.render(texto_rep, True, color_texto), (x_panel + margen, y_actual))
         y_actual += 28
 
-    # Estas funciones quedan opcionales si ya usás dibujar_panel_lateral
-    def mostrar_info_clima(self, clima):
-        pass
+        # Guia
+        texto_pickup = f"Pickup"
+        texto_dropoff = f"Dropoff"
+        self.screen.blit(font_guia.render(texto_pickup, True, (255,185,50)), (x_panel + margen, y_actual))
+        y_actual += 22
+        self.screen.blit(font_guia.render(texto_dropoff, True, (0, 100, 0)), (x_panel + margen, y_actual))
+        y_actual += 22
 
-    def mostrar_lista_pedidos(self, pedidos):
-        pass
+
+    def resaltar_celda(self, x, y, color, texto=None):
+        font_numero = pygame.font.SysFont("Arial", 12, bold=True)
+
+        x_pixel = x * self.cell_size
+        y_pixel = y * self.cell_size
+
+        s = pygame.Surface((self.cell_size, self.cell_size), pygame.SRCALPHA)
+        s.fill(color) 
+        self.screen.blit(s, (x_pixel, y_pixel))
+
+        if texto:
+            color_texto = (255, 255, 255)
+            superficie_texto = font_numero.render(texto, True, color_texto)
+        
+            x_centrado = x_pixel + (self.cell_size - superficie_texto.get_width()) // 2
+            y_centrado = y_pixel + (self.cell_size - superficie_texto.get_height()) // 2 
+            self.screen.blit(superficie_texto, (x_centrado, y_centrado))
