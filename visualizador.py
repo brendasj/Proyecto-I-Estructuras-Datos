@@ -96,10 +96,15 @@ class Visualizador:
 
         self.screen.blit(font_titulo.render("Pedidos en Inventario:", True, color_texto), (x_panel + margen, y_actual))
         y_actual += 28
+        self.screen.blit(font_contenido.render("Prioridad (P), Orden de entrega (O)", True, (0, 0, 255)), (x_panel + margen, y_actual))
+        y_actual += 22
 
         for pedido in pedidos_inventario:
             texto = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority} | {pedido.pickup} | {pedido.dropoff}"
             self.screen.blit(font_contenido.render(texto, True, (0, 100, 0)), (x_panel + margen, y_actual))
+            y_actual += 22
+            texto2 = f"Hora de entrega: {pedido.deadline_str[11:]}"
+            self.screen.blit(font_contenido.render(texto2, True, (0, 100, 0)), (x_panel + margen, y_actual))
             y_actual += 22
 
         # Peso
