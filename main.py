@@ -35,6 +35,9 @@ def main():
         tiempo_juego = 0
         incluido = True
 
+        inventario = trabajador.inventario.forward()
+        inventario_modo = 'P'
+
         running = True
         while running:
             dt = clock.tick(60) / 1000.0
@@ -53,6 +56,11 @@ def main():
                             if trabajador.inventario.agregar_pedido(pedido_a_aceptar):
                                 pedidos.aceptar_pedido()
                                 incluido = True
+
+                                if inventario_modo == 'O':
+                                    inventario = trabajador.inventario.orden_por_entrega()
+                                else:
+                                    inventario = trabajador.inventario.forward() 
                             else:
                                 incluido = False
 
@@ -60,6 +68,15 @@ def main():
                     if event.key == pygame.K_r:
                         if pedidos.pedidos:
                             pedidos.rechazar_pedido()
+                    
+                    if event.key == pygame.K_o:
+                        if trabajador.inventario:
+                            inventario = trabajador.inventario.orden_por_entrega()
+                            inventario_modo = 'O'
+                    if event.key == pygame.K_p:
+                        if trabajador.inventario:
+                            inventario = trabajador.inventario.forward()
+                            inventario_modo = 'P'
 
             keys = pygame.key.get_pressed()
             clima.actualizar() 
@@ -72,7 +89,14 @@ def main():
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, pedidos.obtener_todos_los_pedidos(), trabajador.inventario.forward(), trabajador.inventario.peso_actual, incluido, velocidad_actual, resistencia=trabajador.resistencia, reputacion = trabajador.reputacion)
+            visualizador.dibujar_panel_lateral(clima, 
+                                               pedidos.obtener_todos_los_pedidos(), 
+                                               inventario, 
+                                               trabajador.inventario.peso_actual, 
+                                               incluido, 
+                                               velocidad_actual, 
+                                               resistencia=trabajador.resistencia, 
+                                               reputacion = trabajador.reputacion)
 
             for pedido_a_aceptar in trabajador.inventario.forward():
                 visualizador.resaltar_celda(pedido_a_aceptar.pickup[0], pedido_a_aceptar.pickup[1], color=(255, 165, 0, 100), texto=pedido_a_aceptar.id[4:])

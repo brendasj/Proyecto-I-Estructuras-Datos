@@ -14,7 +14,6 @@ class Inventario:
     
     def agregar_pedido(self, pedido):
         if self.peso_actual + pedido.weight > self.peso_maximo:
-            print("No se puede agregar el pedido, el peso maximo ha sido superado")
             return False
         else:
             nodo = Nodo(pedido)
@@ -64,3 +63,12 @@ class Inventario:
             pedidos.append(actual.pedido)
             actual = actual.anterior
         return pedidos
+    
+    def orden_por_entrega(self):
+        pedidos_no_ordenados = self.forward()
+
+        pedidos_ordenados = [p for p in pedidos_no_ordenados if p.deadline is not None]
+        pedidos_ordenados.sort(key=lambda pedido: pedido.deadline)
+
+        return pedidos_ordenados
+            
