@@ -11,6 +11,7 @@ class Inventario:
         self.actual = None
         self.peso_maximo = peso_maximo
         self.peso_actual = 0
+        self.entregados = []
 
     def agregar_pedido(self, pedido):
         if self.peso_actual + pedido.weight > self.peso_maximo:
@@ -43,6 +44,29 @@ class Inventario:
                 return True
             nodo = nodo.next
         return False
+    
+    def marcar_entregado(self, pedido_entregado):
+        nodo = self.head
+        while nodo:
+            if nodo.pedido.id == pedido_entregado.id:
+                self.entregados.append(nodo.pedido)
+                self.peso_actual -= nodo.pedido.weight
+
+                # Remover de la lista doblemente enlazada
+                if nodo.prev:
+                    nodo.prev.next = nodo.next
+                else:
+                    self.head = nodo.next
+                if nodo.next:
+                    nodo.next.prev = nodo.prev
+                else:
+                    self.tail = nodo.prev
+                if self.actual == nodo:
+                    self.actual = nodo.next or nodo.prev
+                return True
+            nodo = nodo.next
+        return False
+
 
     def siguiente(self):
         if self.actual and self.actual.next:

@@ -14,7 +14,16 @@ class Pedidos:
         if isinstance(datos, dict) and "data" in datos and isinstance(datos["data"], list):
             self.pedidos = []
             for i, pedido_data in enumerate(datos["data"]):
-                pedido = Pedido(pedido_data)
+                pedido = Pedido(
+                            id=pedido_data["id"],
+                            payout=pedido_data["payout"],
+                            priority=pedido_data["priority"],
+                            pickup=tuple(pedido_data["pickup"]),
+                            dropoff=tuple(pedido_data["dropoff"]),
+                            weight=pedido_data["weight"],
+                            deadline=pedido_data["deadline"],
+                            release_time=pedido_data["release_time"]
+                        )
                 heapq.heappush(self.pedidos, (-pedido.priority, i, pedido))
             return True
         else:
@@ -40,3 +49,4 @@ class Pedidos:
     def rechazar_pedido(self):
         if self.pedidos:
             prioridad, indice, pedido = heapq.heappop(self.pedidos)
+            print(f"Pedido {pedido.id} rechazado")

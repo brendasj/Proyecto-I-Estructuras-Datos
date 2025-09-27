@@ -1,142 +1,109 @@
 import pygame
 import os
 from inventario import Inventario
+from estado_trabajador import EstadoTrabajador
 
 class Trabajador:
-    def __init__(self, mapa_width, mapa_height, cell_size, peso_maximo = 5, velocidad_estandar = 3):
+    def __init__(self, mapa_width, mapa_height, cell_size, peso_maximo=5, velocidad_estandar=3):
         self.mapa_width = mapa_width
         self.mapa_height = mapa_height
         self.cell_size = cell_size
         self.pedido_actual = None
 
-        self.resistencia = 100
-        self.reputacion = 70
         self.inventario = Inventario(peso_maximo)
+        self.estado = EstadoTrabajador()
 
         self.velocidad_estandar = velocidad_estandar
 
         self.trabajador_original = pygame.image.load(os.path.join("assets", "trabajador.png"))
-        self.trabajador = pygame.transform.scale(self.trabajador_original, (50, 50))
+        self.trabajador = pygame.transform.scale(self.trabajador_original, (30, 30))
         self.trabajadorRect = self.trabajador.get_rect()
-
-        # Poner al trabajador en una posición inicial
         self.trabajadorRect.center = (mapa_width // 2 * cell_size, mapa_height // 2 * cell_size)
 
-    def esta_en_parque(self, mapa):
-        esquinas = [
-            (self.trabajadorRect.topleft[0], self.trabajadorRect.topleft[1]),
-            (self.trabajadorRect.topright[0], self.trabajadorRect.topright[1]),
-            (self.trabajadorRect.bottomleft[0], self.trabajadorRect.bottomleft[1]),
-            (self.trabajadorRect.bottomright[0], self.trabajadorRect.bottomright[1]),
-        ]
-
-        for x, y in esquinas:
+    def es_transitable(self, rect, mapa):
+      puntos = [
+        rect.topleft,
+        rect.topright,
+        rect.bottomleft,
+        rect.bottomright,
+        rect.center,
+        (rect.left + rect.width // 2, rect.top),      # borde superior
+        (rect.left + rect.width // 2, rect.bottom),   # borde inferior
+        (rect.left, rect.top + rect.height // 2),     # borde izquierdo
+        (rect.right, rect.top + rect.height // 2),    # borde derecho
+    ]
+      for x, y in puntos:
             x_celda = int(x / self.cell_size)
             y_celda = int(y / self.cell_size)
-        
-            celda_actual = mapa.obtener_celda(x_celda, y_celda)
+            celda = mapa.obtener_celda(x_celda, y_celda)
+            if celda in ['P',"""  'B', ' '  """]:  # Parque o edificio
+                return False    
+      return True
 
-            if celda_actual == 'P':
-                return True
-        return False
 
     def obtener_velocidad(self, clima, mapa):
         efecto_clima = clima.efecto_trabajador()
         clima_velocidad = efecto_clima.get("velocidad", 1.0)
+        peso_velocidad = max(0.8, 1 - 0.03 * self.inventario.peso_actual)
+        reputacion_velocidad = 1.03 if self.estado.reputacion >= 90 else 1.0
 
-        peso_velocidad = max(0.8, 1-0.03 * self.inventario.peso_actual)
-
-        reputacion_velocidad = 1.03 if self.reputacion >= 90 else 1.0
-
-        if self.resistencia > 30:
+        resistencia = self.estado.resistencia
+        if resistencia > 30:
             resistencia_velocidad = 1.0
-        elif 10 <= self.resistencia <= 30:
+        elif 10 <= resistencia <= 30:
             resistencia_velocidad = 0.8
         else:
             resistencia_velocidad = 0
 
-        if self.esta_en_parque(mapa):
-            surface_weight = 0.95
-        else:
-            x = int(self.trabajadorRect.centerx / self.cell_size)
-            y = int(self.trabajadorRect.centery / self.cell_size)
-            celda_actual = mapa.obtener_celda(x, y)
-
-            leyenda_celda = mapa.legend.get(celda_actual)
-
-            if leyenda_celda and isinstance(leyenda_celda, dict):
-                surface_weight = leyenda_celda.get('surface_weight', 1.0)
-            else:
-                surface_weight = 1.0
+        x = int(self.trabajadorRect.centerx / self.cell_size)
+        y = int(self.trabajadorRect.centery / self.cell_size)
+        celda_actual = mapa.obtener_celda(x, y)
+        leyenda = mapa.legend.get(celda_actual)
+        surface_weight = leyenda.get('surface_weight', 1.0) if isinstance(leyenda, dict) else 1.0
 
         velocidad = self.velocidad_estandar * clima_velocidad * peso_velocidad * reputacion_velocidad * resistencia_velocidad * surface_weight
         return velocidad
 
-    def mover(self, keys, clima, dt, velocidad):
+    def mover(self, keys, clima, dt, velocidad, mapa):
         movimiento = False
+        movimiento_pixeles = velocidad * self.cell_size * dt
+        nuevo_rect = self.trabajadorRect.copy()
 
-        posicion_inicial = self.trabajadorRect.copy()
-
-        if self.resistencia > 0:
-            movimiento_pixeles = velocidad * self.cell_size * dt
-
-            # Movimiento vertical
+        if self.estado.resistencia > 1:
             if keys[pygame.K_UP]:
-                self.trabajadorRect.move_ip(0, -movimiento_pixeles)
-                movimiento = True
+                nuevo_rect.move_ip(0, -movimiento_pixeles)
+                if self.es_transitable(nuevo_rect, mapa):
+                    self.trabajadorRect = nuevo_rect.copy()
+                    movimiento = True
+
             if keys[pygame.K_DOWN]:
-                self.trabajadorRect.move_ip(0, movimiento_pixeles)
-                movimiento = True
-            
-            # Movimiento horizontal
+                nuevo_rect = self.trabajadorRect.copy()
+                nuevo_rect.move_ip(0, movimiento_pixeles)
+                if self.es_transitable(nuevo_rect, mapa):
+                    self.trabajadorRect = nuevo_rect.copy()
+                    movimiento = True
+
             if keys[pygame.K_LEFT]:
-                self.trabajadorRect.move_ip(-movimiento_pixeles, 0)
-                movimiento = True
+                nuevo_rect = self.trabajadorRect.copy()
+                nuevo_rect.move_ip(-movimiento_pixeles, 0)
+                if self.es_transitable(nuevo_rect, mapa):
+                    self.trabajadorRect = nuevo_rect.copy()
+                    movimiento = True
+
             if keys[pygame.K_RIGHT]:
-                self.trabajadorRect.move_ip(movimiento_pixeles, 0)
-                movimiento = True
-        
-            if posicion_inicial != self.trabajadorRect:
-                movimiento = True
-                self.calculo_resistencia(clima, dt)
-        
+                nuevo_rect = self.trabajadorRect.copy()
+                nuevo_rect.move_ip(movimiento_pixeles, 0)
+                if self.es_transitable(nuevo_rect, mapa):
+                    self.trabajadorRect = nuevo_rect.copy()
+                    movimiento = True
+
+            if movimiento:
+                self.estado.consumir_resistencia(clima, self.inventario.peso_actual, dt)
+
         if not movimiento:
-            self.recuperar_resistencia(dt)
+            self.estado.recuperar_resistencia(dt)
 
-        # Limitar al trabajador a los bordes del mapa
-        self.trabajadorRect.clamp_ip(
-            (0, 0, self.mapa_width * self.cell_size, self.mapa_height * self.cell_size)
-        )
-        
-    
-    def calculo_resistencia(self, clima, dt):
-        base = 0.5 * dt
-
-        peso = 0
-        if self.inventario.peso_actual > 3:
-            peso = 0.2 * dt
-        
-        efecto_clima = {
-            "lluvia" : 0.1,
-            "viento" : 0.1,
-            "tormenta" : 0.3,
-            "calor_extremo" : 0.2,
-            "soleado" : 0
-        }
-            
-        clima = efecto_clima.get(clima.estado.lower, 0.0) * dt
-        self.resistencia -= (base + peso + clima)
-
-        if self.resistencia < 0:
-            self.resistencia = 0
-        
-    def recuperar_resistencia(self, tiempo):
-        recuperacion_rate = 5
-        self.resistencia += recuperacion_rate * tiempo
-
-        if self.resistencia > 100:
-            self.resistencia = 100
+        self.trabajadorRect.clamp_ip((0, 0, self.mapa_width * self.cell_size, self.mapa_height * self.cell_size))
 
     def dibujar(self, pantalla):
-        # Dibuja el trabajador en la pantalla
         pantalla.blit(self.trabajador, self.trabajadorRect)

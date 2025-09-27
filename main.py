@@ -31,11 +31,8 @@ def main():
         pedidos.procesar_pedidos()
 
         clock = pygame.time.Clock()
-
         tiempo_juego = 0
         incluido = True
-
-        inventario = trabajador.inventario.forward()
         inventario_modo = 'P'
 
         running = True
@@ -49,60 +46,58 @@ def main():
 
                 # Lógica para aceptar/rechazar pedidos
                 if event.type == pygame.KEYDOWN:
-                    # Aceptar pedido
                     if event.key == pygame.K_a:
                         pedido_a_aceptar = pedidos.obtener_siguiente_pedido()
                         if pedido_a_aceptar:
                             if trabajador.inventario.agregar_pedido(pedido_a_aceptar):
                                 pedidos.aceptar_pedido()
                                 incluido = True
-
-                                if inventario_modo == 'O':
-                                    inventario = trabajador.inventario.orden_por_entrega()
-                                else:
-                                    inventario = trabajador.inventario.forward() 
                             else:
                                 incluido = False
 
-                    # Rechazar pedido
                     if event.key == pygame.K_r:
                         if pedidos.pedidos:
                             pedidos.rechazar_pedido()
-                    
+
                     if event.key == pygame.K_o:
-                        if trabajador.inventario:
-                            inventario = trabajador.inventario.orden_por_entrega()
-                            inventario_modo = 'O'
+                        inventario_modo = 'O'
+
                     if event.key == pygame.K_p:
-                        if trabajador.inventario:
-                            inventario = trabajador.inventario.forward()
-                            inventario_modo = 'P'
+                        inventario_modo = 'P'
 
             keys = pygame.key.get_pressed()
-            clima.actualizar() 
-
+            clima.actualizar()
             velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
-
-            trabajador.mover(keys, clima, dt, velocidad_actual)
+            trabajador.mover(keys, clima, dt, velocidad_actual, mapa)
+            # Verificar recogida y entrega por proximidad
+            for pedido in trabajador.inventario.todos_los_pedidos():
+                pedido.verificar_interaccion(trabajador.trabajadorRect, cell_size, trabajador.inventario)
 
             # Limpiar y dibujar
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, 
-                                               pedidos.obtener_todos_los_pedidos(), 
-                                               inventario, 
-                                               trabajador.inventario.peso_actual, 
-                                               incluido, 
-                                               velocidad_actual, 
-                                               resistencia=trabajador.resistencia, 
-                                               reputacion = trabajador.reputacion)
 
-            for pedido_a_aceptar in trabajador.inventario.forward():
-                visualizador.resaltar_celda(pedido_a_aceptar.pickup[0], pedido_a_aceptar.pickup[1], color=(255, 165, 0, 100), texto=pedido_a_aceptar.id[4:])
-                visualizador.resaltar_celda(pedido_a_aceptar.dropoff[0], pedido_a_aceptar.dropoff[1], color=(0, 255, 0, 100), texto=pedido_a_aceptar.id[4:])
+            # Mostrar panel lateral
+            visualizador.dibujar_panel_lateral(
+                clima,
+                pedidos.obtener_todos_los_pedidos(),
+                trabajador.inventario.todos_los_pedidos(),
+                peso=trabajador.inventario.peso_actual,
+                incluido=incluido,
+                velocidad=velocidad_actual,
+                resistencia=int(trabajador.estado.resistencia),
+                reputacion=int(trabajador.estado.reputacion),
+                entregados=trabajador.inventario.entregados
+            )
 
-            
+            # Resaltar pickups y dropoffs
+            for pedido in trabajador.inventario.todos_los_pedidos():
+                if not pedido.recogido:
+                    visualizador.resaltar_celda(pedido.pickup[0], pedido.pickup[1], (255, 185, 50, 100), "↑")
+                elif not pedido.entregado:
+                    visualizador.resaltar_celda(pedido.dropoff[0], pedido.dropoff[1], (255, 255, 0, 100), "↓")
+
             pygame.display.flip()
     else:
         print("No se pudo cargar el mapa. Saliendo del programa.")
