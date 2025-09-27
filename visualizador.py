@@ -2,11 +2,11 @@ import pygame
 import os
 
 class Visualizador:
-    def __init__(self, mapa, cell_size=32):
+    def __init__(self, mapa, cell_size):
         pygame.init()
         self.mapa = mapa
         self.cell_size = cell_size
-        self.panel_lateral = 300  # ancho del panel lateral
+        self.panel_lateral = 270  # ancho del panel lateral
 
         # Ajustar tamaño de pantalla para incluir el panel lateral
         self.screen = pygame.display.set_mode(
@@ -19,6 +19,7 @@ class Visualizador:
             'B': pygame.image.load(os.path.join("assets", "edificio.png")),
             'P': pygame.image.load(os.path.join("assets", "parque.png"))
         }
+        self.sprites_base['P'] = pygame.transform.scale(self.sprites_base['P'], (24, 24))
 
         self.sprites_grandes = {}
 
@@ -27,8 +28,13 @@ class Visualizador:
         for y, fila in enumerate(matriz):
             for x, celda in enumerate(fila):
                 if celda == 'C' or celda == 'P':
-                    sprite = self.sprites_base.get(celda)
+                    sprite = pygame.transform.scale(self.sprites_base.get(celda), (self.cell_size, self.cell_size))
                     self.screen.blit(sprite, (x * self.cell_size, y * self.cell_size))
+
+                elif celda == 'B':
+                    sprite = pygame.transform.scale(self.sprites_base.get(celda), (self.cell_size, self.cell_size))
+                    self.screen.blit(sprite, (x * self.cell_size, y * self.cell_size))
+
                 elif celda.startswith('B_('):
                     if celda not in self.sprites_grandes:
                         partes = celda.replace(')', '').split('(')[1].split('x')
@@ -37,10 +43,11 @@ class Visualizador:
                         base_sprite = self.sprites_base['B']
                         nuevo_tamano = (self.cell_size * ancho_bloque, self.cell_size * alto_bloque)
                         self.sprites_grandes[celda] = pygame.transform.scale(base_sprite, nuevo_tamano)
+
                     sprite_grande = self.sprites_grandes.get(celda)
                     self.screen.blit(sprite_grande, (x * self.cell_size, y * self.cell_size))
 
-    def dibujar_panel_lateral(self, clima, pedidos, resistencia=None, reputacion=None):
+    def dibujar_panel_lateral(self, clima, pedidos_disponible, pedidos_inventario, peso, incluido, velocidad, resistencia=None, reputacion=None):
         x_panel = self.mapa.width * self.cell_size
         y_panel = 0
         alto_total = self.mapa.height * self.cell_size
@@ -51,6 +58,7 @@ class Visualizador:
 
         font_titulo = pygame.font.SysFont("Arial", 20)
         font_contenido = pygame.font.SysFont("Arial", 16)
+        font_guia = pygame.font.SysFont("Arial", 16, bold=True)
         color_texto = (30, 30, 30)
 
         y_actual = 20
@@ -63,7 +71,7 @@ class Visualizador:
 
         # Resistencia
         if resistencia is not None:
-            texto_res = f"Resistencia: {resistencia}/100"
+            texto_res = f"Resistencia: {resistencia:.2f}/100."
             self.screen.blit(font_contenido.render(texto_res, True, color_texto), (x_panel + margen, y_actual))
             y_actual += 24
 
@@ -73,18 +81,69 @@ class Visualizador:
             self.screen.blit(font_contenido.render(texto_rep, True, color_texto), (x_panel + margen, y_actual))
             y_actual += 24
 
-        # Pedidos
-        self.screen.blit(font_titulo.render("Pedidos:", True, color_texto), (x_panel + margen, y_actual))
+        # Pedidos Disponibles 
+        self.screen.blit(font_titulo.render("Pedidos Disponibles:", True, color_texto), (x_panel + margen, y_actual))
         y_actual += 28
 
-        for pedido in pedidos:
-            texto = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority} | {pedido.deadline.strftime('%H:%M')}"
-            self.screen.blit(font_contenido.render(texto, True, color_texto), (x_panel + margen, y_actual))
+        if pedidos_disponible:
+            pedido = pedidos_disponible[0]
+            texto = f"Aceptar (A) | Rechazar (R)"
+            self.screen.blit(font_contenido.render(texto, True, (0, 0, 255)), (x_panel + margen, y_actual))
+            y_actual += 22
+            texto_pedido = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority}"
+            self.screen.blit(font_contenido.render(texto_pedido, True, (0, 0, 0)), (x_panel + margen, y_actual))
+            y_actual += 28
+
+        self.screen.blit(font_titulo.render("Pedidos en Inventario:", True, color_texto), (x_panel + margen, y_actual))
+        y_actual += 28
+        self.screen.blit(font_contenido.render("Prioridad (P), Orden de entrega (O)", True, (0, 0, 255)), (x_panel + margen, y_actual))
+        y_actual += 22
+
+        for pedido in pedidos_inventario:
+            texto = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority} | {pedido.pickup} | {pedido.dropoff}"
+            self.screen.blit(font_contenido.render(texto, True, (0, 100, 0)), (x_panel + margen, y_actual))
+            y_actual += 22
+            texto2 = f"Hora de entrega: {pedido.deadline_str[11:]}"
+            self.screen.blit(font_contenido.render(texto2, True, (0, 100, 0)), (x_panel + margen, y_actual))
             y_actual += 22
 
-    # Estas funciones quedan opcionales si ya usás dibujar_panel_lateral
-    def mostrar_info_clima(self, clima):
-        pass
+        # Peso
+        texto_rep = f"Peso: {peso}"
+        self.screen.blit(font_titulo.render(texto_rep, True, color_texto), (x_panel + margen, y_actual))
+        y_actual += 28
+        if incluido == False:
+            texto = f"Peso máximo alcanzado"
+            self.screen.blit(font_contenido.render(texto, True, (0, 0, 255)), (x_panel + margen, y_actual))
+            y_actual += 22
 
-    def mostrar_lista_pedidos(self, pedidos):
-        pass
+        # Velocidad
+        texto_rep = f"Velocidad: {velocidad:.2f}"
+        self.screen.blit(font_titulo.render(texto_rep, True, color_texto), (x_panel + margen, y_actual))
+        y_actual += 28
+
+        # Guia
+        texto_pickup = f"Pickup"
+        texto_dropoff = f"Dropoff"
+        self.screen.blit(font_guia.render(texto_pickup, True, (255,185,50)), (x_panel + margen, y_actual))
+        y_actual += 22
+        self.screen.blit(font_guia.render(texto_dropoff, True, (0, 100, 0)), (x_panel + margen, y_actual))
+        y_actual += 22
+
+
+    def resaltar_celda(self, x, y, color, texto=None):
+        font_numero = pygame.font.SysFont("Arial", 12, bold=True)
+
+        x_pixel = x * self.cell_size
+        y_pixel = y * self.cell_size
+
+        s = pygame.Surface((self.cell_size, self.cell_size), pygame.SRCALPHA)
+        s.fill(color) 
+        self.screen.blit(s, (x_pixel, y_pixel))
+
+        if texto:
+            color_texto = (255, 255, 255)
+            superficie_texto = font_numero.render(texto, True, color_texto)
+        
+            x_centrado = x_pixel + (self.cell_size - superficie_texto.get_width()) // 2
+            y_centrado = y_pixel + (self.cell_size - superficie_texto.get_height()) // 2 
+            self.screen.blit(superficie_texto, (x_centrado, y_centrado))

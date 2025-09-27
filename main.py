@@ -4,7 +4,7 @@ from mapa import Mapa
 from visualizador import Visualizador
 from trabajador import Trabajador
 from datos_clima import ClimaMarkov
-from datos_trabajos import Pedido
+from pedidos import Pedidos
 
 def main():
     pygame.init()
@@ -16,7 +16,7 @@ def main():
         "city_name": "TigerCity",
         "goal": 1500
     }
-    cell_size = 22
+    cell_size = 24
 
     client = ApiClient()
     datos = client.obtener_mapa(params)
@@ -27,30 +27,81 @@ def main():
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
         clima = ClimaMarkov("TigerCity")
 
+        pedidos = Pedidos(client)
+        pedidos.procesar_pedidos()
 
-        datos_trabajos = client.obtener_trabajos()
-        pedidos = []
-        if datos_trabajos:
-          for datos in datos_trabajos.get("data", []):
-            pedido = Pedido(datos) 
-            pedidos.append(pedido)
+        clock = pygame.time.Clock()
+
+        tiempo_juego = 0
+        incluido = True
+
+        inventario = trabajador.inventario.forward()
+        inventario_modo = 'P'
 
         running = True
         while running:
+            dt = clock.tick(60) / 1000.0
+            tiempo_juego += dt
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
+                # Lógica para aceptar/rechazar pedidos
+                if event.type == pygame.KEYDOWN:
+                    # Aceptar pedido
+                    if event.key == pygame.K_a:
+                        pedido_a_aceptar = pedidos.obtener_siguiente_pedido()
+                        if pedido_a_aceptar:
+                            if trabajador.inventario.agregar_pedido(pedido_a_aceptar):
+                                pedidos.aceptar_pedido()
+                                incluido = True
+
+                                if inventario_modo == 'O':
+                                    inventario = trabajador.inventario.orden_por_entrega()
+                                else:
+                                    inventario = trabajador.inventario.forward() 
+                            else:
+                                incluido = False
+
+                    # Rechazar pedido
+                    if event.key == pygame.K_r:
+                        if pedidos.pedidos:
+                            pedidos.rechazar_pedido()
+                    
+                    if event.key == pygame.K_o:
+                        if trabajador.inventario:
+                            inventario = trabajador.inventario.orden_por_entrega()
+                            inventario_modo = 'O'
+                    if event.key == pygame.K_p:
+                        if trabajador.inventario:
+                            inventario = trabajador.inventario.forward()
+                            inventario_modo = 'P'
+
             keys = pygame.key.get_pressed()
-            trabajador.mover(keys)
-            
-            clima.actualizar()  
+            clima.actualizar() 
+
+            velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
+
+            trabajador.mover(keys, clima, dt, velocidad_actual)
 
             # Limpiar y dibujar
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
-            visualizador.dibujar_panel_lateral(clima, pedidos, resistencia=100, reputacion=70)
+            visualizador.dibujar_panel_lateral(clima, 
+                                               pedidos.obtener_todos_los_pedidos(), 
+                                               inventario, 
+                                               trabajador.inventario.peso_actual, 
+                                               incluido, 
+                                               velocidad_actual, 
+                                               resistencia=trabajador.resistencia, 
+                                               reputacion = trabajador.reputacion)
+
+            for pedido_a_aceptar in trabajador.inventario.forward():
+                visualizador.resaltar_celda(pedido_a_aceptar.pickup[0], pedido_a_aceptar.pickup[1], color=(255, 165, 0, 100), texto=pedido_a_aceptar.id[4:])
+                visualizador.resaltar_celda(pedido_a_aceptar.dropoff[0], pedido_a_aceptar.dropoff[1], color=(0, 255, 0, 100), texto=pedido_a_aceptar.id[4:])
+
             
             pygame.display.flip()
     else:
