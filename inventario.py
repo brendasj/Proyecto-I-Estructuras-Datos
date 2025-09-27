@@ -5,7 +5,7 @@ class PedidoNodo:
         self.next = None
         
 class Inventario:
-    def __init__(self, peso_maximo=10):
+    def __init__(self, peso_maximo=5):
         self.head = None
         self.tail = None
         self.actual = None

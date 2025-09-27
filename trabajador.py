@@ -37,7 +37,7 @@ class Trabajador:
             x_celda = int(x / self.cell_size)
             y_celda = int(y / self.cell_size)
             celda = mapa.obtener_celda(x_celda, y_celda)
-            if celda in ['P',"""  'B', ' '  """]:  # Parque o edificio
+            if celda in ['P', 'B', ' ']:  # Parque o edificio
                 return False    
       return True
 

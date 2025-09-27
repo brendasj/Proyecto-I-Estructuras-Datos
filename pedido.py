@@ -47,7 +47,7 @@ class Pedido:
 
             # Evaluar puntualidad con tiempo simulado
             if tiempo_juego <= self.deadline:
-                estado.modificar_reputacion(+2)
+                estado.modificar_reputacion(+10)
             else:
                 estado.modificar_reputacion(-5)
 
