@@ -12,6 +12,7 @@ class Trabajador:
 
         self.inventario = Inventario(peso_maximo)
         self.estado = EstadoTrabajador()
+        self.entregados = []
 
         self.velocidad_estandar = velocidad_estandar
 

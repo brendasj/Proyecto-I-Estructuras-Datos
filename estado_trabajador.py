@@ -35,6 +35,10 @@ class EstadoTrabajador:
     def sumar_ingresos(self, cantidad):
         self.ingresos += cantidad
 
+    def recibir_pago(self, cantidad):
+        self.sumar_ingresos(cantidad)
+        print(f"Pago recibido: ${cantidad:.2f} → Total acumulado: ${self.ingresos:.2f}")
+
     def meta_alcanzada(self):
         return self.ingresos >= self.meta
 

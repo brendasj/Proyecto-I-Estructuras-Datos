@@ -1,4 +1,5 @@
 import pygame
+from datetime import datetime
 from api_client import ApiClient
 from mapa import Mapa
 from visualizador import Visualizador
@@ -57,7 +58,9 @@ def main():
 
                     if event.key == pygame.K_r:
                         if pedidos.pedidos:
-                            pedidos.rechazar_pedido()
+                            pedido_rechazado = pedidos.rechazar_pedido()
+                            if pedido_rechazado:
+                                trabajador.estado.modificar_reputacion(-3)
 
                     if event.key == pygame.K_o:
                         inventario_modo = 'O'
@@ -69,9 +72,17 @@ def main():
             clima.actualizar()
             velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
             trabajador.mover(keys, clima, dt, velocidad_actual, mapa)
+
             # Verificar recogida y entrega por proximidad
+            tiempo_actual = datetime.now()
             for pedido in trabajador.inventario.todos_los_pedidos():
-                pedido.verificar_interaccion(trabajador.trabajadorRect, cell_size, trabajador.inventario)
+                pedido.verificar_interaccion(
+                    trabajador.trabajadorRect,
+                    cell_size,
+                    trabajador.inventario,
+                    trabajador.estado,
+                    tiempo_juego
+                )
 
             # Limpiar y dibujar
             visualizador.screen.fill((255, 255, 255))
@@ -88,7 +99,9 @@ def main():
                 velocidad=velocidad_actual,
                 resistencia=int(trabajador.estado.resistencia),
                 reputacion=int(trabajador.estado.reputacion),
-                entregados=trabajador.inventario.entregados
+                entregados=trabajador.inventario.entregados,
+                ingresos=trabajador.estado.ingresos,
+                meta=trabajador.estado.meta
             )
 
             # Resaltar pickups y dropoffs
