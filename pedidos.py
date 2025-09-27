@@ -15,15 +15,15 @@ class Pedidos:
             self.pedidos = []
             for i, pedido_data in enumerate(datos["data"]):
                 pedido = Pedido(
-                            id=pedido_data["id"],
-                            payout=pedido_data["payout"],
-                            priority=pedido_data["priority"],
-                            pickup=tuple(pedido_data["pickup"]),
-                            dropoff=tuple(pedido_data["dropoff"]),
-                            weight=pedido_data["weight"],
-                            deadline=pedido_data["deadline"],
-                            release_time=pedido_data["release_time"]
-                        )
+                    id=pedido_data["id"],
+                    payout=pedido_data["payout"],
+                    priority=pedido_data["priority"],
+                    pickup=tuple(pedido_data["pickup"]),
+                    dropoff=tuple(pedido_data["dropoff"]),
+                    weight=pedido_data["weight"],
+                    deadline=pedido_data["deadline"],
+                    release_time=pedido_data["release_time"]
+                )
                 heapq.heappush(self.pedidos, (-pedido.priority, i, pedido))
             return True
         else:
@@ -32,21 +32,23 @@ class Pedidos:
     
     def obtener_siguiente_pedido(self) -> Pedido:
         if self.pedidos:
-            prioridad, indice, pedido = self.pedidos[0]
+            _, _, pedido = self.pedidos[0]
             return pedido
         return None
 
     def obtener_todos_los_pedidos(self) -> list[Pedido]:
-        return [pedido for prioridad, indice, pedido in self.pedidos]
+        return [pedido for _, _, pedido in self.pedidos]
     
     def aceptar_pedido(self) -> Pedido:
         if self.pedidos:
-            prioridad, indice, pedido = heapq.heappop(self.pedidos)
+            _, _, pedido = heapq.heappop(self.pedidos)
             self.pedidos_aceptados.append(pedido)
             return pedido
         return None
 
-    def rechazar_pedido(self):
+    def rechazar_pedido(self) -> Pedido:
         if self.pedidos:
-            prioridad, indice, pedido = heapq.heappop(self.pedidos)
+            _, _, pedido = heapq.heappop(self.pedidos)
             print(f"Pedido {pedido.id} rechazado")
+            return pedido
+        return None

@@ -53,7 +53,7 @@ class Visualizador:
                     sprite_grande = self.sprites_grandes.get(celda)
                     self.screen.blit(sprite_grande, (x * self.cell_size, y * self.cell_size))
 
-    def dibujar_panel_lateral(self, clima, pedidos_disponible, pedidos_inventario, peso, incluido, velocidad, resistencia=None, reputacion=None, entregados=None):
+    def dibujar_panel_lateral(self, clima, pedidos_disponible, pedidos_inventario, peso, incluido, velocidad, resistencia=None, reputacion=None, entregados=None, ingresos=None, meta=None):
         x_panel = self.mapa.width * self.cell_size
         y_panel = 0
         alto_total = self.mapa.height * self.cell_size
@@ -179,6 +179,27 @@ class Visualizador:
         self.screen.blit(font_guia.render("Dropoff", True, (0, 100, 0)), (x_panel + margen, y_actual))
         y_actual += 22
 """
+        # Progreso de ingresos
+        if ingresos is not None and meta is not None:
+            texto_ingresos = f"Ingresos: ${ingresos:.2f} / ${meta}"
+            self.screen.blit(font_contenido.render(texto_ingresos, True, color_texto), (x_panel + margen, y_actual))
+            y_actual += 24
+
+            # Barra visual
+            barra_ancho = 200
+            barra_alto = 12
+            x_barra = x_panel + margen
+            y_barra = y_actual
+
+            porcentaje = min(1.0, ingresos / meta)
+            ancho_lleno = int(barra_ancho * porcentaje)
+
+            color_barra = (0, 150, 255) if porcentaje < 1.0 else (0, 200, 100)  # azul o verde si completado
+
+            pygame.draw.rect(self.screen, (180, 180, 180), (x_barra, y_barra, barra_ancho, barra_alto))
+            pygame.draw.rect(self.screen, color_barra, (x_barra, y_barra, ancho_lleno, barra_alto))
+            y_actual += barra_alto + 10
+
     def resaltar_celda(self, x, y, color, texto=None):
         font_numero = pygame.font.SysFont("Arial", 12, bold=True)
 
