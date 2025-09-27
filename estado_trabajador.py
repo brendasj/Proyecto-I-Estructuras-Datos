@@ -1,5 +1,5 @@
 class EstadoTrabajador:
-    def __init__(self, meta_ingresos=1500):
+    def __init__(self, meta_ingresos=1100):
         self.resistencia = 100
         self.reputacion = 70
         self.ingresos = 0

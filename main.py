@@ -15,7 +15,7 @@ def main():
         "height": 27,
         "types": ["B", "P", "C"],
         "city_name": "TigerCity",
-        "goal": 1500
+        "goal": 1100
     }
     cell_size = 24
 
@@ -60,7 +60,7 @@ def main():
                         if pedidos.pedidos:
                             pedido_rechazado = pedidos.rechazar_pedido()
                             if pedido_rechazado:
-                                trabajador.estado.modificar_reputacion(-3)
+                                trabajador.estado.modificar_reputacion(-3) # Penalización por rechazar
 
                     if event.key == pygame.K_o:
                         inventario_modo = 'O'
