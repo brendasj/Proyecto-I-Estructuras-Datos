@@ -1,74 +1,75 @@
-class Nodo:
+class PedidoNodo:
     def __init__(self, pedido):
         self.pedido = pedido
-        self.siguiente = None
-        self.anterior = None
-    
-
+        self.prev = None
+        self.next = None
+        
 class Inventario:
-    def __init__(self, peso_maximo):
+    def __init__(self, peso_maximo=10):
         self.head = None
         self.tail = None
+        self.actual = None
         self.peso_maximo = peso_maximo
         self.peso_actual = 0
-    
+
     def agregar_pedido(self, pedido):
         if self.peso_actual + pedido.weight > self.peso_maximo:
-            return False
+            return False  # No se puede agregar, excede el peso
+        nuevo = PedidoNodo(pedido)
+        if not self.head:
+            self.head = self.tail = self.actual = nuevo
         else:
-            nodo = Nodo(pedido)
-            if not self.head:
-                self.head = nodo
-                self.tail = nodo
-            else:
-                self.tail.siguiente = nodo
-                nodo.anterior = self.tail
-                self.tail = nodo
-            
-            self.peso_actual += pedido.getPeso()
-            return True
+            self.tail.next = nuevo
+            nuevo.prev = self.tail
+            self.tail = nuevo
+        self.peso_actual += pedido.weight
+        return True
 
     def quitar_pedido(self, pedido_id):
-        actual = self.head
-
-        while actual:
-            if actual.pedido.id == pedido_id:
-                if actual.anterior:
-                    actual.anterior.siguiente = actual.siguiente
+        nodo = self.head
+        while nodo:
+            if nodo.pedido.id == pedido_id:
+                if nodo.prev:
+                    nodo.prev.next = nodo.next
                 else:
-                    self.head = actual.siguiente
-                
-                if actual.siguiente:
-                    actual.siguiente.anterior = actual.anterior
+                    self.head = nodo.next
+                if nodo.next:
+                    nodo.next.prev = nodo.prev
                 else:
-                    self.tail = actual.anterior
-                
-                self.peso_actual -= actual.pedido.getPeso()
+                    self.tail = nodo.prev
+                if self.actual == nodo:
+                    self.actual = nodo.next or nodo.prev
+                self.peso_actual -= nodo.pedido.weight
                 return True
-            actual = actual.siguiente
+            nodo = nodo.next
         return False
-    
-    def forward(self):
-        pedidos = []
-        actual = self.head
-        while actual:
-            pedidos.append(actual.pedido)
-            actual = actual.siguiente
-        return pedidos
-    
-    def backward(self):
-        pedidos = []
-        actual = self.tail
-        while actual:
-            pedidos.append(actual.pedido)
-            actual = actual.anterior
-        return pedidos
-    
-    def orden_por_entrega(self):
-        pedidos_no_ordenados = self.forward()
 
-        pedidos_ordenados = [p for p in pedidos_no_ordenados if p.deadline is not None]
-        pedidos_ordenados.sort(key=lambda pedido: pedido.deadline)
+    def siguiente(self):
+        if self.actual and self.actual.next:
+            self.actual = self.actual.next
 
-        return pedidos_ordenados
-            
+    def anterior(self):
+        if self.actual and self.actual.prev:
+            self.actual = self.actual.prev
+
+    def pedido_actual(self):
+        return self.actual.pedido if self.actual else None
+
+    def todos_los_pedidos(self):
+        pedidos = []
+        nodo = self.head
+        while nodo:
+            pedidos.append(nodo.pedido)
+            nodo = nodo.next
+        return pedidos
+
+    def visualizar_por_prioridad(self):
+        return sorted(self.todos_los_pedidos(), key=lambda p: p.priority, reverse=True)
+
+    def visualizar_por_entrega(self):
+        return sorted(self.todos_los_pedidos(), key=lambda p: p.deadline)
+
+    def mostrar_inventario(self):
+        print(f"Inventario ({self.peso_actual}/{self.peso_maximo} kg):")
+        for pedido in self.todos_los_pedidos():
+            pedido.mostrar()
