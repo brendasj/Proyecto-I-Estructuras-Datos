@@ -7,6 +7,25 @@ from trabajador import Trabajador
 from datos_clima import ClimaMarkov
 from pedidos import Pedidos
 
+from tkinter import messagebox
+import tkinter as tk
+
+def mostrar_estado_final(resultado):
+    root = tk.Tk()
+    root.withdraw()
+
+    if resultado == "victoria":
+        titulo = "VICTORIA"
+        mensaje = f"¡Felicidades! Has alcanzado la meta"
+        messagebox.showinfo(titulo, mensaje)
+    elif resultado == "derrota":
+        titulo = "DERROTA"
+        mensaje = f"Peridste, tu reputación es menor a 20"
+        messagebox.showinfo(titulo, mensaje)
+
+    root.destroy()
+
+
 def main():
     pygame.init()
     
@@ -38,6 +57,14 @@ def main():
 
         running = True
         while running:
+
+            if trabajador.estado.ingresos >= params["goal"]:
+                running = False
+                mostrar_estado_final("victoria")
+            elif trabajador.estado.reputacion < 20:
+                running = False
+                mostrar_estado_final("derrota")
+
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
 
