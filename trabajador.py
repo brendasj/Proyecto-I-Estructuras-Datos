@@ -36,9 +36,9 @@ class Trabajador:
       for x, y in puntos:
             x_celda = int(x / self.cell_size)
             y_celda = int(y / self.cell_size)
-           # celda = mapa.obtener_celda(x_celda, y_celda)
-            #if celda in ['B', ' ']:  # Parque o edificio
-             #   return False    
+            celda = mapa.obtener_celda(x_celda, y_celda)
+            if celda in ['B', 'P', ' '] :  # Parque o edificio
+               return False    
       return True
 
 
@@ -77,21 +77,21 @@ class Trabajador:
                     self.trabajadorRect = nuevo_rect.copy()
                     movimiento = True
 
-            if keys[pygame.K_DOWN]:
+            if keys[pygame.K_DOWN] and movimiento==False:
                 nuevo_rect = self.trabajadorRect.copy()
                 nuevo_rect.move_ip(0, movimiento_pixeles)
                 if self.es_transitable(nuevo_rect, mapa):
                     self.trabajadorRect = nuevo_rect.copy()
                     movimiento = True
 
-            if keys[pygame.K_LEFT]:
+            if keys[pygame.K_LEFT] and movimiento==False:
                 nuevo_rect = self.trabajadorRect.copy()
                 nuevo_rect.move_ip(-movimiento_pixeles, 0)
                 if self.es_transitable(nuevo_rect, mapa):
                     self.trabajadorRect = nuevo_rect.copy()
                     movimiento = True
 
-            if keys[pygame.K_RIGHT]:
+            if keys[pygame.K_RIGHT] and movimiento==False:
                 nuevo_rect = self.trabajadorRect.copy()
                 nuevo_rect.move_ip(movimiento_pixeles, 0)
                 if self.es_transitable(nuevo_rect, mapa):

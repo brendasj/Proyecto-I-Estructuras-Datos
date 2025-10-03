@@ -42,6 +42,7 @@ def main():
     datos = client.obtener_mapa(params)
 
     if datos:
+        
         mapa = Mapa(datos)
         visualizador = Visualizador(mapa, cell_size)
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
