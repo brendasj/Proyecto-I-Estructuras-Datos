@@ -37,7 +37,7 @@ class Trabajador:
             x_celda = int(x / self.cell_size)
             y_celda = int(y / self.cell_size)
             celda = mapa.obtener_celda(x_celda, y_celda)
-            if celda in ['B', 'P', ' '] :  # Parque o edificio
+            if celda in ['B', ' '] :  # edificio
                return False    
       return True
 
@@ -71,35 +71,38 @@ class Trabajador:
         nuevo_rect = self.trabajadorRect.copy()
 
         if self.estado.resistencia > 1:
-            if keys[pygame.K_UP]:
-                nuevo_rect.move_ip(0, -movimiento_pixeles)
-                if self.es_transitable(nuevo_rect, mapa):
-                    self.trabajadorRect = nuevo_rect.copy()
-                    movimiento = True
+            if keys == pygame.QUIT:
+                return
+            else:
+                if keys==pygame.K_UP:
+                    nuevo_rect.move_ip(0, -movimiento_pixeles)
+                    if self.es_transitable(nuevo_rect, mapa):
+                        self.trabajadorRect = nuevo_rect.copy()
+                        movimiento = True
 
-            if keys[pygame.K_DOWN] and movimiento==False:
-                nuevo_rect = self.trabajadorRect.copy()
-                nuevo_rect.move_ip(0, movimiento_pixeles)
-                if self.es_transitable(nuevo_rect, mapa):
-                    self.trabajadorRect = nuevo_rect.copy()
-                    movimiento = True
+                if keys==pygame.K_DOWN:
+                    nuevo_rect = self.trabajadorRect.copy()
+                    nuevo_rect.move_ip(0, movimiento_pixeles)
+                    if self.es_transitable(nuevo_rect, mapa):
+                        self.trabajadorRect = nuevo_rect.copy()
+                        movimiento = True
 
-            if keys[pygame.K_LEFT] and movimiento==False:
-                nuevo_rect = self.trabajadorRect.copy()
-                nuevo_rect.move_ip(-movimiento_pixeles, 0)
-                if self.es_transitable(nuevo_rect, mapa):
-                    self.trabajadorRect = nuevo_rect.copy()
-                    movimiento = True
+                if keys==pygame.K_LEFT:
+                    nuevo_rect = self.trabajadorRect.copy()
+                    nuevo_rect.move_ip(-movimiento_pixeles, 0)
+                    if self.es_transitable(nuevo_rect, mapa):
+                        self.trabajadorRect = nuevo_rect.copy()
+                        movimiento = True
 
-            if keys[pygame.K_RIGHT] and movimiento==False:
-                nuevo_rect = self.trabajadorRect.copy()
-                nuevo_rect.move_ip(movimiento_pixeles, 0)
-                if self.es_transitable(nuevo_rect, mapa):
-                    self.trabajadorRect = nuevo_rect.copy()
-                    movimiento = True
+                if keys==pygame.K_RIGHT:
+                    nuevo_rect = self.trabajadorRect.copy()
+                    nuevo_rect.move_ip(movimiento_pixeles, 0)
+                    if self.es_transitable(nuevo_rect, mapa):
+                        self.trabajadorRect = nuevo_rect.copy()
+                        movimiento = True
 
-            if movimiento:
-                self.estado.consumir_resistencia(clima, self.inventario.peso_actual, dt)
+                if movimiento:
+                    self.estado.consumir_resistencia(clima, self.inventario.peso_actual, dt)
 
         if not movimiento:
             self.estado.recuperar_resistencia(dt)
