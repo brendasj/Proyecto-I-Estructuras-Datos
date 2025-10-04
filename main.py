@@ -68,11 +68,12 @@ def main():
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
 
+                # Movimiento controlado solo en KEYDOWN
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
-                # Lógica para aceptar/rechazar pedidos
+                # Pedidos e inventario
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
                         pedido_a_aceptar = pedidos.obtener_siguiente_pedido()
@@ -83,22 +84,24 @@ def main():
                             else:
                                 incluido = False
 
-                    if event.key == pygame.K_r:
+                    elif event.key == pygame.K_r:
                         if pedidos.pedidos:
                             pedido_rechazado = pedidos.rechazar_pedido()
                             if pedido_rechazado:
-                                trabajador.estado.modificar_reputacion(-3) # Penalización por rechazar
+                                trabajador.estado.modificar_reputacion(-3)
 
-                    if event.key == pygame.K_o:
+                    elif event.key == pygame.K_o:
                         inventario_modo = 'O'
 
-                    if event.key == pygame.K_p:
+                    elif event.key == pygame.K_p:
                         inventario_modo = 'P'
 
-            keys = pygame.key.get_pressed()
-            clima.actualizar()
-            velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
-            trabajador.mover(keys, clima, dt, velocidad_actual, mapa)
+                    # 🚶‍♂️ Movimiento de una casilla por pulsación
+                    elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
+                        trabajador.mover_una_celda(event.key, clima, velocidad_actual, mapa)
+
+                clima.actualizar()
+                velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
 
             # Verificar recogida y entrega por proximidad
             tiempo_actual = datetime.now()

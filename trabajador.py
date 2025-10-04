@@ -71,38 +71,35 @@ class Trabajador:
         nuevo_rect = self.trabajadorRect.copy()
 
         if self.estado.resistencia > 1:
-            if keys == pygame.QUIT:
-                return
-            else:
-                if keys==pygame.K_UP:
-                    nuevo_rect.move_ip(0, -movimiento_pixeles)
-                    if self.es_transitable(nuevo_rect, mapa):
-                        self.trabajadorRect = nuevo_rect.copy()
-                        movimiento = True
+            if keys[pygame.K_UP]:
+                nuevo_rect.move_ip(0, -movimiento_pixeles)
+                if self.es_transitable(nuevo_rect, mapa):
+                    self.trabajadorRect = nuevo_rect.copy()
+                    movimiento = True
 
-                if keys==pygame.K_DOWN:
-                    nuevo_rect = self.trabajadorRect.copy()
-                    nuevo_rect.move_ip(0, movimiento_pixeles)
-                    if self.es_transitable(nuevo_rect, mapa):
-                        self.trabajadorRect = nuevo_rect.copy()
-                        movimiento = True
+            if keys[pygame.K_DOWN] and movimiento==False:
+                nuevo_rect = self.trabajadorRect.copy()
+                nuevo_rect.move_ip(0, movimiento_pixeles)
+                if self.es_transitable(nuevo_rect, mapa):
+                    self.trabajadorRect = nuevo_rect.copy()
+                    movimiento = True
 
-                if keys==pygame.K_LEFT:
-                    nuevo_rect = self.trabajadorRect.copy()
-                    nuevo_rect.move_ip(-movimiento_pixeles, 0)
-                    if self.es_transitable(nuevo_rect, mapa):
-                        self.trabajadorRect = nuevo_rect.copy()
-                        movimiento = True
+            if keys[pygame.K_LEFT] and movimiento==False:
+                nuevo_rect = self.trabajadorRect.copy()
+                nuevo_rect.move_ip(-movimiento_pixeles, 0)
+                if self.es_transitable(nuevo_rect, mapa):
+                    self.trabajadorRect = nuevo_rect.copy()
+                    movimiento = True
 
-                if keys==pygame.K_RIGHT:
-                    nuevo_rect = self.trabajadorRect.copy()
-                    nuevo_rect.move_ip(movimiento_pixeles, 0)
-                    if self.es_transitable(nuevo_rect, mapa):
-                        self.trabajadorRect = nuevo_rect.copy()
-                        movimiento = True
+            if keys[pygame.K_RIGHT] and movimiento==False:
+                nuevo_rect = self.trabajadorRect.copy()
+                nuevo_rect.move_ip(movimiento_pixeles, 0)
+                if self.es_transitable(nuevo_rect, mapa):
+                    self.trabajadorRect = nuevo_rect.copy()
+                    movimiento = True
 
-                if movimiento:
-                    self.estado.consumir_resistencia(clima, self.inventario.peso_actual, dt)
+            if movimiento:
+                self.estado.consumir_resistencia(clima, self.inventario.peso_actual, dt)
 
         if not movimiento:
             self.estado.recuperar_resistencia(dt)
@@ -111,3 +108,29 @@ class Trabajador:
 
     def dibujar(self, pantalla):
         pantalla.blit(self.trabajador, self.trabajadorRect)
+
+    def mover_una_celda(self, key, clima, velocidad, mapa):
+        if self.estado.resistencia <= 1:
+            self.estado.recuperar_resistencia(0.1)
+            return
+
+        dx, dy = 0, 0
+        if key == pygame.K_UP:
+            dy = -1
+        elif key == pygame.K_DOWN:
+            dy = 1
+        elif key == pygame.K_LEFT:
+            dx = -1
+        elif key == pygame.K_RIGHT:
+            dx = 1
+
+        nuevo_rect = self.trabajadorRect.copy()
+        nuevo_rect.move_ip(dx * self.cell_size, dy * self.cell_size)
+
+        if self.es_transitable(nuevo_rect, mapa):
+            self.trabajadorRect = nuevo_rect
+            self.estado.consumir_resistencia(clima, self.inventario.peso_actual, 0.1)
+        else:
+            self.estado.recuperar_resistencia(0.1)
+
+        self.trabajadorRect.clamp_ip((0, 0, self.mapa_width * self.cell_size, self.mapa_height * self.cell_size))
