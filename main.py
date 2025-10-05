@@ -75,7 +75,7 @@ def main():
             elif trabajador.estado.reputacion < 20:
                 running = False
                 mostrar_estado_final("derrota")
-            elif total_pedidos == pedidos_tratados and trabajador.estado.ingresos < params["goal"]:
+            elif total_pedidos == pedidos_tratados and trabajador.estado.ingresos < params["goal"] and trabajador.inventario.esta_vacia():
                 running = False
                 mostrar_estado_final("derrota")
 
