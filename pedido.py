@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Pedido:
     def __init__(self, id, payout, priority, pickup, dropoff, weight, deadline, release_time):
@@ -9,19 +9,34 @@ class Pedido:
         self.dropoff = dropoff
         self.weight = weight
 
-        # Convertir fechas ISO a segundos relativos desde el release_time
-        formato = "%Y-%m-%dT%H:%M"
         try:
-            release_dt = datetime.strptime(release_time, formato)
-            deadline_dt = datetime.strptime(deadline, formato)
-            self.release_time = 0
-            self.deadline = (deadline_dt - release_dt).total_seconds()
+            if isinstance(deadline, str) and isinstance(release_time, (int, float)):
+                deadline = deadline.strip().replace("Z", "+00:00")
+                deadline_dt = datetime.fromisoformat(deadline)
+                release_dt = datetime.fromtimestamp(release_time, tz=timezone.utc)
+                self.deadline = (deadline_dt - release_dt).total_seconds()
+                self.release_time = float(release_time)
+
+            elif isinstance(deadline, (int, float)) and isinstance(release_time, (int, float)):
+                self.deadline = float(deadline)
+                self.release_time = float(release_time)
+
+            elif isinstance(deadline, str) and isinstance(release_time, str):
+                deadline = deadline.strip().replace("Z", "+00:00")
+                release_time = release_time.strip().replace("Z", "+00:00")
+                deadline_dt = datetime.fromisoformat(deadline)
+                release_dt = datetime.fromisoformat(release_time)
+                self.deadline = (deadline_dt - release_dt).total_seconds()
+                self.release_time = 0
+
+            else:
+                raise ValueError("Formato de fecha no reconocido")
+
         except Exception as e:
             print(f"Error al convertir fechas: {e}")
-            self.release_time = 0
-            self.deadline = 300  # valor por defecto: 5 minutos
+            self.deadline = 300
 
-        self.deadline_str = deadline[11:] if isinstance(deadline, str) else "?"
+        self.deadline_str = deadline[11:16] if isinstance(deadline, str) else "?"
         self.recogido = False
         self.entregado = False
 
