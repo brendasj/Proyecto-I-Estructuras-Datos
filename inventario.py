@@ -97,3 +97,6 @@ class Inventario:
         print(f"Inventario ({self.peso_actual}/{self.peso_maximo} kg):")
         for pedido in self.todos_los_pedidos():
             pedido.mostrar()
+
+    def esta_vacia(self):
+        return self.head is None
