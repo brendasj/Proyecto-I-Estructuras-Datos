@@ -104,11 +104,28 @@ def main():
                                 penalizaciones += 3 
                                 pedidos_tratados += 1
 
+
                     elif event.key == pygame.K_o:
                         inventario_modo = 'O'
 
                     elif event.key == pygame.K_p:
                         inventario_modo = 'P'
+
+                    elif event.key == pygame.K_s:
+                        #guardar en json la partida
+                        puntaje = Puntaje(
+                            ingresos=trabajador.estado.ingresos,
+                            bonos=bono, 
+                            penalizaciones=penalizaciones
+                        )
+                        historial.agregar(puntaje)
+
+                    elif event.key == pygame.K_l:
+                        partida_anterior=historial._cargar()
+                        trabajador.estado.ingresos=partida_anterior[0]["ingresos"]
+                        bono=partida_anterior[0]["bonos"]
+                        penalizaciones=partida_anterior[0]["penalizaciones"]
+                        #se debe cargar la partida
 
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
                         trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
