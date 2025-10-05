@@ -50,7 +50,10 @@ def mostrar_opciones(op):
         contador += 1
 
     select = simpledialog.askinteger(titulo,impresion)
-    return select - 1
+    if select is not None:
+        return select - 1
+    else:
+        return -1
 
 def main():
     pygame.init()
@@ -166,7 +169,7 @@ def main():
                                 opciones.append(op)
                         #imprimir opciones 
                         sel = mostrar_opciones(opciones)
-                        if sel <= len(opciones):
+                        if sel >= 0 and sel < len(opciones):
                             trabajador.estado.ingresos = opciones[sel]["ingresos"]
                             bono = opciones[sel]["bonos"]
                             penalizaciones = opciones[sel]["penalizaciones"]
