@@ -11,6 +11,8 @@ from puntajes import Puntajes
 
 from tkinter import messagebox
 import tkinter as tk
+from tkinter import simpledialog
+
 
 def mostrar_estado_final(resultado):
     root = tk.Tk()
@@ -19,6 +21,7 @@ def mostrar_estado_final(resultado):
     if resultado == "victoria":
         titulo = "VICTORIA"
         mensaje = f"¡Felicidades! Has alcanzado la meta"
+        
         messagebox.showinfo(titulo, mensaje)
     elif resultado == "derrota":
         titulo = "DERROTA"
@@ -27,6 +30,20 @@ def mostrar_estado_final(resultado):
 
     root.destroy()
 
+def mostrar_opciones(op):
+    titulo= "Partidas disponibles"
+    mensaje="Seleccione una opción de partida"
+    impresion=""
+    contador=1
+    for i in op:
+        dato1= "Ingresos: "+ str(i["ingresos"])
+        dato2 = " Bonos: "+str(i["bonos"])
+        dato3 = " Penalización: "+str(i["penalizaciones"])
+        impresion += "Opcion "+str(contador)+"\n"+dato1+dato2+dato3+"\n"
+        contador+=1
+
+    select = simpledialog.askinteger(titulo,impresion)
+    return select-1
 
 def main():
     pygame.init()
@@ -44,6 +61,8 @@ def main():
     datos = client.obtener_mapa(params)
 
     if datos:
+        bono=0
+        final=False
         mapa = Mapa(datos)
         visualizador = Visualizador(mapa, cell_size)
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
@@ -70,12 +89,16 @@ def main():
             if trabajador.estado.ingresos >= params["goal"]:
                 running = False
                 mostrar_estado_final("victoria")
+                final=True
+                
             elif trabajador.estado.reputacion < 20:
+                final=True
                 running = False
                 mostrar_estado_final("derrota")
             elif total_pedidos == pedidos_tratados and trabajador.estado.ingresos < params["goal"]:
                 running = False
                 mostrar_estado_final("derrota")
+                final=False
 
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
@@ -116,15 +139,23 @@ def main():
                         puntaje = Puntaje(
                             ingresos=trabajador.estado.ingresos,
                             bonos=bono, 
-                            penalizaciones=penalizaciones
+                            penalizaciones=penalizaciones,
+                            finalizado=final
                         )
                         historial.agregar(puntaje)
 
-                    elif event.key == pygame.K_l:
+                    elif event.key == pygame.K_l:#usuario escoge entre los que tienen finalizado == False
                         partida_anterior=historial._cargar()
-                        trabajador.estado.ingresos=partida_anterior[0]["ingresos"]
-                        bono=partida_anterior[0]["bonos"]
-                        penalizaciones=partida_anterior[0]["penalizaciones"]
+                        opciones=[]
+                        for op in partida_anterior:
+                            if op["finalizado"] is False:
+                                opciones.append(op)
+                        #imprimir opciones 
+                        sel=mostrar_opciones(opciones)
+                        
+                        trabajador.estado.ingresos=opciones[sel]["ingresos"]
+                        bono=opciones[sel]["bonos"]
+                        penalizaciones=opciones[sel]["penalizaciones"]
                         #se debe cargar la partida
 
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
@@ -176,14 +207,16 @@ def main():
             pygame.display.flip()
         
         if trabajador.estado.reputacion >= 90:
-            bono = 0.05 * trabajador.estado.ingresos
+            bno = 0.05 * trabajador.estado.ingresos
+            bono+=bno
         else:
-            bono = 0
+            bno = 0
 
         puntaje_final = Puntaje(
             ingresos=trabajador.estado.ingresos,
             bonos=bono, 
-            penalizaciones=penalizaciones
+            penalizaciones=penalizaciones,
+            finalizado=final
         )
 
         historial.agregar(puntaje_final)

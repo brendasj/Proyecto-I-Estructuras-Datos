@@ -2,6 +2,37 @@
     {
         "ingresos": 560.0,
         "bonos": 0,
-        "penalizaciones": 3
+        "penalizaciones": 3,
+        "finalizado": false
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 762.0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 919.5,
+        "bonos": 45.975,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 919.5,
+        "bonos": 45.975,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 560.0,
+        "bonos": 0,
+        "penalizaciones": 3,
+        "finalizado": false
     }
 ]
