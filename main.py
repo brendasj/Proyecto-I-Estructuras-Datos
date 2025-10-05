@@ -57,6 +57,8 @@ def main():
         clock = pygame.time.Clock()
         tiempo_juego = 0
         incluido = True
+
+        inventario = trabajador.inventario.visualizar_por_prioridad()
         inventario_modo = 'P'
 
         penalizaciones = 0
@@ -84,7 +86,6 @@ def main():
                 if event.type == pygame.QUIT:
                     running = False
 
-                # Pedidos e inventario
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
                         pedido_a_aceptar = pedidos.obtener_siguiente_pedido()
@@ -93,6 +94,10 @@ def main():
                                 pedidos.aceptar_pedido()
                                 pedidos_tratados += 1
                                 incluido = True
+                                if inventario_modo == 'O':
+                                    inventario = trabajador.inventario.visualizar_por_entrega()
+                                else:
+                                    inventario = trabajador.inventario.visualizar_por_prioridad() 
                             else:
                                 incluido = False
 
@@ -105,10 +110,12 @@ def main():
                                 pedidos_tratados += 1
 
                     elif event.key == pygame.K_o:
-                        inventario_modo = 'O'
+                        if trabajador.inventario:
+                            inventario_modo = 'O'
 
                     elif event.key == pygame.K_p:
-                        inventario_modo = 'P'
+                        if trabajador.inventario:
+                            inventario_modo = 'P'
 
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
                         trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
@@ -138,7 +145,7 @@ def main():
             visualizador.dibujar_panel_lateral(
                 clima,
                 pedidos.obtener_todos_los_pedidos(),
-                trabajador.inventario.todos_los_pedidos(),
+                inventario,
                 peso=trabajador.inventario.peso_actual,
                 incluido=incluido,
                 velocidad=velocidad_actual,
@@ -148,6 +155,11 @@ def main():
                 ingresos=trabajador.estado.ingresos,
                 meta=trabajador.estado.meta
             )
+
+            if inventario_modo == 'O':
+                inventario = trabajador.inventario.visualizar_por_entrega()
+            else:
+                inventario = trabajador.inventario.visualizar_por_prioridad()
 
             # Resaltar pickups y dropoffs
             for pedido in trabajador.inventario.todos_los_pedidos():
