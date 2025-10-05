@@ -4,11 +4,13 @@ from inventario import Inventario
 from estado_trabajador import EstadoTrabajador
 
 class Trabajador:
+    contador = False
     def __init__(self, mapa_width, mapa_height, cell_size, peso_maximo=5, velocidad_estandar=3):
         self.mapa_width = mapa_width
         self.mapa_height = mapa_height
         self.cell_size = cell_size
         self.pedido_actual = None
+        #self.contador=False
 
         self.inventario = Inventario(peso_maximo)
         self.estado = EstadoTrabajador()
@@ -51,9 +53,9 @@ class Trabajador:
         resistencia = self.estado.resistencia
         if resistencia > 30:
             resistencia_velocidad = 1.0
-        elif 10 <= resistencia <= 30:
+        elif 10 <= resistencia <= 30:#aquí creo que tengo que oner que sea 0 si es menor a treinta
             resistencia_velocidad = 0.8
-        else:
+        elif resistencia==0 or Trabajador.contador==True:
             resistencia_velocidad = 0
 
         x = int(self.trabajadorRect.centerx / self.cell_size)
@@ -65,72 +67,37 @@ class Trabajador:
         velocidad = self.velocidad_estandar * clima_velocidad * peso_velocidad * reputacion_velocidad * resistencia_velocidad * surface_weight
         return velocidad
 
-    def mover(self, keys, clima, dt, velocidad, mapa):
-        movimiento = False
-        movimiento_pixeles = velocidad * self.cell_size * dt
-        nuevo_rect = self.trabajadorRect.copy()
-
-        if self.estado.resistencia > 1:
-            if keys[pygame.K_UP]:
-                nuevo_rect.move_ip(0, -movimiento_pixeles)
-                if self.es_transitable(nuevo_rect, mapa):
-                    self.trabajadorRect = nuevo_rect.copy()
-                    movimiento = True
-
-            if keys[pygame.K_DOWN] and movimiento==False:
-                nuevo_rect = self.trabajadorRect.copy()
-                nuevo_rect.move_ip(0, movimiento_pixeles)
-                if self.es_transitable(nuevo_rect, mapa):
-                    self.trabajadorRect = nuevo_rect.copy()
-                    movimiento = True
-
-            if keys[pygame.K_LEFT] and movimiento==False:
-                nuevo_rect = self.trabajadorRect.copy()
-                nuevo_rect.move_ip(-movimiento_pixeles, 0)
-                if self.es_transitable(nuevo_rect, mapa):
-                    self.trabajadorRect = nuevo_rect.copy()
-                    movimiento = True
-
-            if keys[pygame.K_RIGHT] and movimiento==False:
-                nuevo_rect = self.trabajadorRect.copy()
-                nuevo_rect.move_ip(movimiento_pixeles, 0)
-                if self.es_transitable(nuevo_rect, mapa):
-                    self.trabajadorRect = nuevo_rect.copy()
-                    movimiento = True
-
-            if movimiento:
-                self.estado.consumir_resistencia(clima, self.inventario.peso_actual, dt)
-
-        if not movimiento:
-            self.estado.recuperar_resistencia(dt)
-
-        self.trabajadorRect.clamp_ip((0, 0, self.mapa_width * self.cell_size, self.mapa_height * self.cell_size))
-
     def dibujar(self, pantalla):
         pantalla.blit(self.trabajador, self.trabajadorRect)
 
-    def mover_una_celda(self, key, clima, velocidad, mapa):
-        if self.estado.resistencia <= 1:
-            self.estado.recuperar_resistencia(0.1)
+    def mover_una_celda(self, key, clima, dt, velocidad, mapa):
+        if self.estado.resistencia == 0:
+            Trabajador.contador = True
+            self.estado.recuperar_resistencia(dt)
             return
-
-        dx, dy = 0, 0
-        if key == pygame.K_UP:
-            dy = -1
-        elif key == pygame.K_DOWN:
-            dy = 1
-        elif key == pygame.K_LEFT:
-            dx = -1
-        elif key == pygame.K_RIGHT:
-            dx = 1
-
-        nuevo_rect = self.trabajadorRect.copy()
-        nuevo_rect.move_ip(dx * self.cell_size, dy * self.cell_size)
-
-        if self.es_transitable(nuevo_rect, mapa):
-            self.trabajadorRect = nuevo_rect
-            self.estado.consumir_resistencia(clima, self.inventario.peso_actual, 0.1)
+        elif self.estado.resistencia < 30:
+            if Trabajador.contador:
+                self.estado.recuperar_resistencia(dt)
+            return
         else:
-            self.estado.recuperar_resistencia(0.1)
+            Trabajador.contador = False
+            dx, dy = 0, 0
+            if key == pygame.K_UP:
+                dy = -1
+            elif key == pygame.K_DOWN:
+                dy = 1
+            elif key == pygame.K_LEFT:
+                dx = -1
+            elif key == pygame.K_RIGHT:
+                dx = 1
 
-        self.trabajadorRect.clamp_ip((0, 0, self.mapa_width * self.cell_size, self.mapa_height * self.cell_size))
+            nuevo_rect = self.trabajadorRect.copy()
+            nuevo_rect.move_ip(dx * self.cell_size, dy * self.cell_size)
+
+            if self.es_transitable(nuevo_rect, mapa):
+                self.trabajadorRect = nuevo_rect
+                self.estado.consumir_resistencia(clima, self.inventario.peso_actual, dt)
+            else:
+                self.estado.recuperar_resistencia(dt)
+
+            self.trabajadorRect.clamp_ip((0, 0, self.mapa_width * self.cell_size, self.mapa_height * self.cell_size))

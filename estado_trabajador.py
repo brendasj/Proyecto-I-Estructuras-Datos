@@ -24,11 +24,13 @@ class EstadoTrabajador:
         self.resistencia = max(0, self.resistencia - total)
 
     def recuperar_resistencia(self, dt):
-        recuperacion_rate = 0.5
-        if self.resistencia < 100:
-            self.resistencia += recuperacion_rate * dt
-            self.resistencia = min(100, self.resistencia)
-
+        if self.resistencia == 0:
+            self.resistencia += dt  # recuperación lenta cuando está exhausto
+        elif self.resistencia < 30:
+            self.resistencia += 0.2 * dt  # recuperación moderada
+        elif self.resistencia < 100:
+            self.resistencia += 0.5 * dt  # recuperación normal
+        self.resistencia = min(100, self.resistencia)
     def modificar_reputacion(self, cantidad):
         self.reputacion = max(0, min(100, self.reputacion + cantidad))
 

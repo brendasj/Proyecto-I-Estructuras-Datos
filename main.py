@@ -96,11 +96,10 @@ def main():
                     elif event.key == pygame.K_p:
                         inventario_modo = 'P'
 
-                    # 🚶‍♂️ Movimiento de una casilla por pulsación
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
-                        trabajador.mover_una_celda(event.key, clima, velocidad_actual, mapa)
-
+                        trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
                 clima.actualizar()
+                trabajador.estado.recuperar_resistencia(dt)
                 velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
 
             # Verificar recogida y entrega por proximidad
