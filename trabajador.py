@@ -53,7 +53,7 @@ class Trabajador:
         resistencia = self.estado.resistencia
         if resistencia > 30:
             resistencia_velocidad = 1.0
-        elif 10 <= resistencia <= 30:#aquí creo que tengo que oner que sea 0 si es menor a treinta
+        elif 10 <= resistencia <= 30:
             resistencia_velocidad = 0.8
         elif resistencia==0 or Trabajador.contador==True:
             resistencia_velocidad = 0
@@ -75,9 +75,8 @@ class Trabajador:
             Trabajador.contador = True
             self.estado.recuperar_resistencia(dt)
             return
-        elif self.estado.resistencia < 30:
-            if Trabajador.contador:
-                self.estado.recuperar_resistencia(dt)
+        elif self.estado.resistencia < 30 and Trabajador.contador:
+            self.estado.recuperar_resistencia(dt)
             return
         else:
             Trabajador.contador = False

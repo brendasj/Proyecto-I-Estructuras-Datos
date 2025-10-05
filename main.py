@@ -80,13 +80,12 @@ def main():
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
 
-                # Movimiento controlado solo en KEYDOWN
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
                 # Pedidos e inventario
-                if event.type == pygame.KEYDOWN:
+                elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
                         pedido_a_aceptar = pedidos.obtener_siguiente_pedido()
                         if pedido_a_aceptar:
@@ -113,10 +112,14 @@ def main():
 
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
                         trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
+            
+            teclas = pygame.key.get_pressed()
+
+            if not any(teclas):
                 clima.actualizar()
                 trabajador.estado.recuperar_resistencia(dt)
                 velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
-
+            
             for pedido in trabajador.inventario.todos_los_pedidos():
                 pedido.verificar_interaccion(
                     trabajador.trabajadorRect,
