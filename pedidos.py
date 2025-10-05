@@ -39,6 +39,11 @@ class Pedidos:
     def obtener_todos_los_pedidos(self) -> list[Pedido]:
         return [pedido for _, _, pedido in self.pedidos]
     
+    def cantidad_pedidos(self, sum = 0):
+        for i in self.pedidos:
+            sum += 1
+        return sum
+    
     def aceptar_pedido(self) -> Pedido:
         if self.pedidos:
             _, _, pedido = heapq.heappop(self.pedidos)

@@ -6,6 +6,8 @@ from visualizador import Visualizador
 from trabajador import Trabajador
 from datos_clima import ClimaMarkov
 from pedidos import Pedidos
+from puntaje import Puntaje
+from puntajes import Puntajes
 
 from tkinter import messagebox
 import tkinter as tk
@@ -20,7 +22,7 @@ def mostrar_estado_final(resultado):
         messagebox.showinfo(titulo, mensaje)
     elif resultado == "derrota":
         titulo = "DERROTA"
-        mensaje = f"Peridste, tu reputación es menor a 20"
+        mensaje = f"Perdiste, no alcanzaste los objetivos"
         messagebox.showinfo(titulo, mensaje)
 
     root.destroy()
@@ -50,10 +52,17 @@ def main():
         pedidos = Pedidos(client)
         pedidos.procesar_pedidos()
 
+        historial = Puntajes()
+
         clock = pygame.time.Clock()
         tiempo_juego = 0
         incluido = True
         inventario_modo = 'P'
+
+        penalizaciones = 0
+
+        total_pedidos = pedidos.cantidad_pedidos()
+        pedidos_tratados = 0
 
         running = True
         while running:
@@ -62,6 +71,9 @@ def main():
                 running = False
                 mostrar_estado_final("victoria")
             elif trabajador.estado.reputacion < 20:
+                running = False
+                mostrar_estado_final("derrota")
+            elif total_pedidos == pedidos_tratados and trabajador.estado.ingresos < params["goal"]:
                 running = False
                 mostrar_estado_final("derrota")
 
@@ -79,6 +91,7 @@ def main():
                         if pedido_a_aceptar:
                             if trabajador.inventario.agregar_pedido(pedido_a_aceptar):
                                 pedidos.aceptar_pedido()
+                                pedidos_tratados += 1
                                 incluido = True
                             else:
                                 incluido = False
@@ -87,7 +100,9 @@ def main():
                         if pedidos.pedidos:
                             pedido_rechazado = pedidos.rechazar_pedido()
                             if pedido_rechazado:
-                                trabajador.estado.modificar_reputacion(-3) # Penalización por rechazar
+                                trabajador.estado.modificar_reputacion(-3)
+                                penalizaciones += 3 
+                                pedidos_tratados += 1
 
                     if event.key == pygame.K_o:
                         inventario_modo = 'O'
@@ -100,8 +115,6 @@ def main():
             velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
             trabajador.mover(keys, clima, dt, velocidad_actual, mapa)
 
-            # Verificar recogida y entrega por proximidad
-            tiempo_actual = datetime.now()
             for pedido in trabajador.inventario.todos_los_pedidos():
                 pedido.verificar_interaccion(
                     trabajador.trabajadorRect,
@@ -139,6 +152,19 @@ def main():
                     visualizador.resaltar_celda(pedido.dropoff[0], pedido.dropoff[1], (255, 255, 0, 100), "↓")
 
             pygame.display.flip()
+        
+        if trabajador.estado.reputacion >= 90:
+            bono = 0.05 * trabajador.estado.ingresos
+        else:
+            bono = 0
+
+        puntaje_final = Puntaje(
+            ingresos=trabajador.estado.ingresos,
+            bonos=bono, 
+            penalizaciones=penalizaciones
+        )
+
+        historial.agregar(puntaje_final)
     else:
         print("No se pudo cargar el mapa. Saliendo del programa.")
 
