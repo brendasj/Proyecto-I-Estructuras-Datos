@@ -76,6 +76,8 @@ def main():
         clock = pygame.time.Clock()
         tiempo_juego = 0
         incluido = True
+
+        inventario = trabajador.inventario.visualizar_por_prioridad()
         inventario_modo = 'P'
 
         penalizaciones = 0
@@ -95,7 +97,7 @@ def main():
                 final=True
                 running = False
                 mostrar_estado_final("derrota")
-            elif total_pedidos == pedidos_tratados and trabajador.estado.ingresos < params["goal"]:
+            elif total_pedidos == pedidos_tratados and trabajador.estado.ingresos < params["goal"] and trabajador.inventario.esta_vacia():
                 running = False
                 mostrar_estado_final("derrota")
                 final=False
@@ -107,7 +109,6 @@ def main():
                 if event.type == pygame.QUIT:
                     running = False
 
-                # Pedidos e inventario
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
                         pedido_a_aceptar = pedidos.obtener_siguiente_pedido()
@@ -116,6 +117,10 @@ def main():
                                 pedidos.aceptar_pedido()
                                 pedidos_tratados += 1
                                 incluido = True
+                                if inventario_modo == 'O':
+                                    inventario = trabajador.inventario.visualizar_por_entrega()
+                                else:
+                                    inventario = trabajador.inventario.visualizar_por_prioridad() 
                             else:
                                 incluido = False
 
@@ -129,10 +134,12 @@ def main():
 
 
                     elif event.key == pygame.K_o:
-                        inventario_modo = 'O'
+                        if trabajador.inventario:
+                            inventario_modo = 'O'
 
                     elif event.key == pygame.K_p:
-                        inventario_modo = 'P'
+                        if trabajador.inventario:
+                            inventario_modo = 'P'
 
                     elif event.key == pygame.K_s:
                         #guardar en json la partida
@@ -186,7 +193,7 @@ def main():
             visualizador.dibujar_panel_lateral(
                 clima,
                 pedidos.obtener_todos_los_pedidos(),
-                trabajador.inventario.todos_los_pedidos(),
+                inventario,
                 peso=trabajador.inventario.peso_actual,
                 incluido=incluido,
                 velocidad=velocidad_actual,
@@ -196,6 +203,11 @@ def main():
                 ingresos=trabajador.estado.ingresos,
                 meta=trabajador.estado.meta
             )
+
+            if inventario_modo == 'O':
+                inventario = trabajador.inventario.visualizar_por_entrega()
+            else:
+                inventario = trabajador.inventario.visualizar_por_prioridad()
 
             # Resaltar pickups y dropoffs
             for pedido in trabajador.inventario.todos_los_pedidos():
