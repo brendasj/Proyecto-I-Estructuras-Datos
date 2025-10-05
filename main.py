@@ -38,19 +38,19 @@ def mostrar_error():
     root.destroy()
 
 def mostrar_opciones(op):
-    titulo= "Partidas disponibles"
-    mensaje="Seleccione una opción de partida"
-    impresion=""
-    contador=1
+    titulo = "Partidas disponibles"
+    mensaje ="Seleccione una opción de partida"
+    impresion = ""
+    contador = 1
     for i in op:
-        dato1= "Ingresos: "+ str(i["ingresos"])
-        dato2 = " Bonos: "+str(i["bonos"])
-        dato3 = " Penalización: "+str(i["penalizaciones"])
-        impresion += "Opcion "+str(contador)+"\n"+dato1+dato2+dato3+"\n"
-        contador+=1
+        dato1 = "Ingresos: " + str(i["ingresos"])
+        dato2 = " Bonos: " + str(i["bonos"])
+        dato3 = " Penalización: " + str(i["penalizaciones"])
+        impresion += "Opcion " + str(contador) + "\n" + dato1 + dato2 + dato3 + "\n"
+        contador += 1
 
     select = simpledialog.askinteger(titulo,impresion)
-    return select-1
+    return select - 1
 
 def main():
     pygame.init()
@@ -68,8 +68,8 @@ def main():
     datos = client.obtener_mapa(params)
 
     if datos:
-        bono=0
-        final=False
+        bono = 0
+        final = False
         mapa = Mapa(datos)
         visualizador = Visualizador(mapa, cell_size)
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
@@ -98,16 +98,16 @@ def main():
             if trabajador.estado.ingresos >= params["goal"]:
                 running = False
                 mostrar_estado_final("victoria")
-                final=True
+                final = True
                 
             elif trabajador.estado.reputacion < 20:
-                final=True
+                final = True
                 running = False
                 mostrar_estado_final("derrota")
             elif total_pedidos == pedidos_tratados and trabajador.estado.ingresos < params["goal"] and trabajador.inventario.esta_vacia():
                 running = False
                 mostrar_estado_final("derrota")
-                final=False
+                final = False
 
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
@@ -159,17 +159,17 @@ def main():
                         historial.agregar(puntaje)
 
                     elif event.key == pygame.K_l:#usuario escoge entre los que tienen finalizado == False
-                        partida_anterior=historial._cargar()
-                        opciones=[]
+                        partida_anterior = historial._cargar()
+                        opciones = []
                         for op in partida_anterior:
                             if op["finalizado"] is False:
                                 opciones.append(op)
                         #imprimir opciones 
-                        sel=mostrar_opciones(opciones)
+                        sel = mostrar_opciones(opciones)
                         if sel <= len(opciones):
-                            trabajador.estado.ingresos=opciones[sel]["ingresos"]
-                            bono=opciones[sel]["bonos"]
-                            penalizaciones=opciones[sel]["penalizaciones"]
+                            trabajador.estado.ingresos = opciones[sel]["ingresos"]
+                            bono = opciones[sel]["bonos"]
+                            penalizaciones = opciones[sel]["penalizaciones"]
                         else:                         
                             mostrar_error()
 
@@ -204,14 +204,14 @@ def main():
                 clima,
                 pedidos.obtener_todos_los_pedidos(),
                 inventario,
-                peso=trabajador.inventario.peso_actual,
-                incluido=incluido,
-                velocidad=velocidad_actual,
-                resistencia=int(trabajador.estado.resistencia),
-                reputacion=int(trabajador.estado.reputacion),
-                entregados=trabajador.inventario.entregados,
-                ingresos=trabajador.estado.ingresos,
-                meta=trabajador.estado.meta
+                peso = trabajador.inventario.peso_actual,
+                incluido = incluido,
+                velocidad = velocidad_actual,
+                resistencia = int(trabajador.estado.resistencia),
+                reputacion = int(trabajador.estado.reputacion),
+                entregados = trabajador.inventario.entregados,
+                ingresos = trabajador.estado.ingresos,
+                meta = trabajador.estado.meta
             )
 
             if inventario_modo == 'O':
@@ -230,15 +230,15 @@ def main():
         
         if trabajador.estado.reputacion >= 90:
             bno = 0.05 * trabajador.estado.ingresos
-            bono+=bno
+            bono += bno
         else:
             bno = 0
 
         puntaje_final = Puntaje(
-            ingresos=trabajador.estado.ingresos,
-            bonos=bono, 
-            penalizaciones=penalizaciones,
-            finalizado=final
+            ingresos = trabajador.estado.ingresos,
+            bonos = bono, 
+            penalizaciones = penalizaciones,
+            finalizado = final
         )
 
         historial.agregar(puntaje_final)

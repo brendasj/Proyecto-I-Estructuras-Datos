@@ -7,7 +7,7 @@ class EstadoTrabajador:
         self.meta = meta_ingresos
     
     def modificar_reputacion(self,cant):
-        self.reputacion+=cant
+        self.reputacion += cant
 
     def consumir_resistencia(self, clima, peso_actual, dt):
         base = 1.5 * dt 
