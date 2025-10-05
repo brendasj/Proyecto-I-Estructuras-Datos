@@ -6,28 +6,15 @@
         "finalizado": false
     },
     {
-        "ingresos": 921.5,
-        "bonos": 46.075,
-        "penalizaciones": 0
+        "ingresos": 1135.0,
+        "bonos": 56.75,
+        "penalizaciones": 3,
+        "finalizado": true
     },
     {
-        "ingresos": 921.5,
-        "bonos": 46.075,
-        "penalizaciones": 0
-    },
-    {
-        "ingresos": 597.5,
-        "bonos": 29.875,
-        "penalizaciones": 6
-    },
-    {
-        "ingresos": 410.0,
+        "ingresos": 0,
         "bonos": 0,
-        "penalizaciones": 3
-    },
-    {
-        "ingresos": 764.0,
-        "bonos": 38.2,
-        "penalizaciones": 6
+        "penalizaciones": 0,
+        "finalizado": false
     }
 ]

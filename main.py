@@ -30,6 +30,13 @@ def mostrar_estado_final(resultado):
 
     root.destroy()
 
+def mostrar_error():
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showinfo("Error", "Opción no válida")
+
+    root.destroy()
+
 def mostrar_opciones(op):
     titulo= "Partidas disponibles"
     mensaje="Seleccione una opción de partida"
@@ -159,10 +166,13 @@ def main():
                                 opciones.append(op)
                         #imprimir opciones 
                         sel=mostrar_opciones(opciones)
-                        
-                        trabajador.estado.ingresos=opciones[sel]["ingresos"]
-                        bono=opciones[sel]["bonos"]
-                        penalizaciones=opciones[sel]["penalizaciones"]
+                        if sel <= len(opciones):
+                            trabajador.estado.ingresos=opciones[sel]["ingresos"]
+                            bono=opciones[sel]["bonos"]
+                            penalizaciones=opciones[sel]["penalizaciones"]
+                        else:                         
+                            mostrar_error()
+
                         #se debe cargar la partida
 
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
