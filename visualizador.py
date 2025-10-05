@@ -172,13 +172,6 @@ class Visualizador:
         self.screen.blit(font_titulo.render(texto_vel, True, color_titulo), (x_panel + margen, y_actual))
         y_actual += 28
 
-        # Guía visual
-        """"""""""
-        self.screen.blit(font_guia.render("Pickup", True, (255,185,50)), (x_panel + margen, y_actual))
-        y_actual += 22
-        self.screen.blit(font_guia.render("Dropoff", True, (0, 100, 0)), (x_panel + margen, y_actual))
-        y_actual += 22
-"""
         # Progreso de ingresos
         if ingresos is not None and meta is not None:
             texto_ingresos = f"Ingresos: ${ingresos:.2f} / ${meta}"
