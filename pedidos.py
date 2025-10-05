@@ -15,14 +15,14 @@ class Pedidos:
             self.pedidos = []
             for i, pedido_data in enumerate(datos["data"]):
                 pedido = Pedido(
-                    id=pedido_data["id"],
-                    payout=pedido_data["payout"],
-                    priority=pedido_data["priority"],
-                    pickup=tuple(pedido_data["pickup"]),
-                    dropoff=tuple(pedido_data["dropoff"]),
-                    weight=pedido_data["weight"],
-                    deadline=pedido_data["deadline"],
-                    release_time=pedido_data["release_time"]
+                    id = pedido_data["id"],
+                    payout = pedido_data["payout"],
+                    priority = pedido_data["priority"],
+                    pickup = tuple(pedido_data["pickup"]),
+                    dropoff = tuple(pedido_data["dropoff"]),
+                    weight = pedido_data["weight"],
+                    deadline = pedido_data["deadline"],
+                    release_time = pedido_data["release_time"]
                 )
                 heapq.heappush(self.pedidos, (-pedido.priority, i, pedido))
             return True
