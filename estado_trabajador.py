@@ -6,7 +6,7 @@ class EstadoTrabajador:
         self.meta = meta_ingresos
 
     def consumir_resistencia(self, clima, peso_actual, dt):
-        base = 1.5 * dt
+        base = 1.5 * dt #cambiar
         peso = 0.03 * dt if peso_actual > 3 else 0
 
         efecto_clima = {
@@ -24,7 +24,7 @@ class EstadoTrabajador:
         self.resistencia = max(0, self.resistencia - total)
 
     def recuperar_resistencia(self, dt):
-        recuperacion_rate = 0.5
+        recuperacion_rate = 0.5#cambiar luego
         if self.resistencia < 100:
             self.resistencia += recuperacion_rate *dt
             self.resistencia = min(100, self.resistencia)

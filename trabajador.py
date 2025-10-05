@@ -55,9 +55,9 @@ class Trabajador:
             resistencia_velocidad = 1.0
         elif 10 <= resistencia <= 30:
             resistencia_velocidad = 0.8
-        elif resistencia==0 or Trabajador.contador==True:
+        else:
             resistencia_velocidad = 0
-
+        
         x = int(self.trabajadorRect.centerx / self.cell_size)
         y = int(self.trabajadorRect.centery / self.cell_size)
         celda_actual = mapa.obtener_celda(x, y)
