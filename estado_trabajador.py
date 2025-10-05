@@ -1,12 +1,16 @@
+import sys
 class EstadoTrabajador:
     def __init__(self, meta_ingresos=1100):
         self.resistencia = 100
         self.reputacion = 70
         self.ingresos = 0
         self.meta = meta_ingresos
+    
+    def modificar_reputacion(self,cant):
+        self.reputacion+=cant
 
     def consumir_resistencia(self, clima, peso_actual, dt):
-        base = 1.5 * dt #cambiar
+        base = 1.5 * dt 
         peso = 0.03 * dt if peso_actual > 3 else 0
 
         efecto_clima = {
@@ -24,7 +28,7 @@ class EstadoTrabajador:
         self.resistencia = max(0, self.resistencia - total)
 
     def recuperar_resistencia(self, dt):
-        recuperacion_rate = 0.5#cambiar luego
+        recuperacion_rate = 0.5
         if self.resistencia < 100:
             self.resistencia += recuperacion_rate *dt
             self.resistencia = min(100, self.resistencia)
@@ -34,6 +38,7 @@ class EstadoTrabajador:
 
     def recibir_pago(self, cantidad):
         self.sumar_ingresos(cantidad)
+        sys.stdout.reconfigure(encoding='utf-8')
         print(f"Pago recibido: ${cantidad:.2f} → Total acumulado: ${self.ingresos:.2f}")
 
     def meta_alcanzada(self):

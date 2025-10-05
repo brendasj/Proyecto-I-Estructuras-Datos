@@ -10,7 +10,6 @@ class Trabajador:
         self.mapa_height = mapa_height
         self.cell_size = cell_size
         self.pedido_actual = None
-        #self.contador=False
 
         self.inventario = Inventario(peso_maximo)
         self.estado = EstadoTrabajador()
