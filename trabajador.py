@@ -51,9 +51,11 @@ class Trabajador:
             "trabajadorRect": self.trabajadorRect.copy()
         }
 
-    def restaurar_estado(self, estado_guardado):
+    def restaurar_estado(self, estado_guardado, pedidos):
         self.pedido_actual = estado_guardado["pedido_actual"]
         self.inventario = estado_guardado["inventario"]
+        for i in pedidos:
+            self.inventario.agregar_pedido(i)
         self.estado = estado_guardado["estado"]
         self.entregados = estado_guardado["entregados"]
         self.trabajadorRect = estado_guardado["trabajadorRect"]

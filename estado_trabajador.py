@@ -10,7 +10,7 @@ class EstadoTrabajador:
         self.reputacion += cant
 
     def consumir_resistencia(self, clima, peso_actual, dt):
-        base = 1.5 * dt 
+        base = 2 * dt 
         peso = 0.03 * dt if peso_actual > 3 else 0
 
         efecto_clima = {

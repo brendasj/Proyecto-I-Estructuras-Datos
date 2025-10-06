@@ -19,7 +19,7 @@ from tkinter import simpledialog
 def dehacer_pasos(mov):
     if len(mov) > 0:
         movimiento_saliente = mov.pop()
-        pedidos = movimiento_saliente[0]
+        pedidos = Pedidos(movimiento_saliente[0])
         trabajador = movimiento_saliente[1]
         bonos = movimiento_saliente[2]
         penalizaciones = movimiento_saliente[3]
@@ -225,7 +225,7 @@ def main():
                             pedidos = nuevos_pedidos
                             bono = nuevo_bono
                             penalizaciones = nueva_penalizacion
-                            trabajador.restaurar_estado(nuevo_trabajador)
+                            trabajador.restaurar_estado(nuevo_trabajador, pedidos)
                         else:
                             messagebox.showinfo("Retroceso de movimientos","No hay movimientos para deshacer.")
                         
