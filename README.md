@@ -46,7 +46,7 @@ Se pierde la partida si:
 | :--- | :--- | :--- | :--- |
 | **`Mapa`** | Representa la cuadrícula de la ciudad, incluyendo calles, edificios y parques. | La cuadrícula (`self.grid`) es una **lista de listas** de caracteres. El método `obtener_matriz()` utiliza **NumPy** para convertir esto en una matriz $N \times M$ para procesamiento eficiente. | `obtener_celda(x, y)`: $O(1)$ (acceso directo a la posición $[y][x]$). `procesar_cuadricula()`: $O(N \cdot M)$ (recorrido completo de la matriz para identificar y marcar bloques de edificios). |
 
-### 4. Diccionarios (Mapas de Transición y Caching)
+### 4. Diccionarios (Mapas de Transición y caché)
 
 | Clase | Uso | Detalle de Implementación | Complejidad de Operaciones |
 | :--- | :--- | :--- | :--- |
