@@ -53,7 +53,7 @@ Se pierde la partida si:
 | **`ClimaMarkov`** | Define la lógica para el cambio de clima. | Utiliza un diccionario anidado (`self.transition`) donde la clave es el estado actual del clima y el valor es otro diccionario con los posibles siguientes estados y sus probabilidades. | `siguiente_estado()`: $O(k)$ (donde $k$ es el número de posibles estados de transición). |
 | **`ApiClient`** | Implementa un mecanismo de "modo offline". | Utiliza un directorio (`self.cache_dir`) y archivos `.json` para guardar la última respuesta de la API (mapa, trabajos) como caché. Esto se implementa con la función `json.dump()` y `json.load()`. | `guardar_en_cache()` / `cargar_desde_cache()`: $O(T)$ (donde $T$ es el tamaño de los datos en caché, generalmente rápido para archivos pequeños). |
 
-### 5. Algoritmos de Ordenación
+### 5. Algoritmos de Ordenamiento
 
 | Clase | Uso | Detalle de Implementación | Complejidad de Operaciones |
 | :--- | :--- | :--- | :--- |
