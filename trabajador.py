@@ -2,7 +2,7 @@ import pygame
 import os
 from inventario import Inventario
 from estado_trabajador import EstadoTrabajador
-
+import copy
 class Trabajador:
     contador = False
     def __init__(self, mapa_width, mapa_height, cell_size, peso_maximo=5, velocidad_estandar=3):
@@ -45,21 +45,24 @@ class Trabajador:
     def obtener_estado(self):
         return {
             "pedido_actual": self.pedido_actual,
-            "inventario": self.inventario,
-            "estado": self.estado,
+            "inventario": copy.deepcopy(self.inventario),
+            "ingresos": self.estado.ingresos,
+            "reputacion": self.estado.reputacion,
+            "resistencia": self.estado.resistencia,
             "entregados": self.entregados.copy(),
             "trabajadorRect": self.trabajadorRect.copy()
         }
 
-    def restaurar_estado(self, estado_guardado, pedidos):
+    def restaurar_estado(self, estado_guardado, entregados):
         self.pedido_actual = estado_guardado["pedido_actual"]
-        self.inventario = estado_guardado["inventario"]
-        for i in pedidos:
-            self.inventario.agregar_pedido(i)
-        self.estado = estado_guardado["estado"]
-        self.entregados = estado_guardado["entregados"]
+        self.inventario = copy.deepcopy(estado_guardado["inventario"])
+        self.estado.ingresos = estado_guardado["ingresos"]
+        self.estado.reputacion = estado_guardado["reputacion"]
+        self.estado.resistencia = estado_guardado["resistencia"]
+        self.entregados = entregados 
         self.trabajadorRect = estado_guardado["trabajadorRect"]
-        
+
+
     def obtener_velocidad(self, clima, mapa):
         efecto_clima = clima.efecto_trabajador()
         clima_velocidad = efecto_clima.get("velocidad", 1.0)
