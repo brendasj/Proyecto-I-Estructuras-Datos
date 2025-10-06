@@ -143,6 +143,8 @@ def main():
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
 
+            movio_este_ciclo = False  # ← NUEVO
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -172,7 +174,6 @@ def main():
                                 pedidos_tratados += 1
                         agregar_pasos(movimientos,pedidos, trabajador, bono, penalizaciones)
 
-
                     elif event.key == pygame.K_o:
                         if trabajador.inventario:
                             inventario_modo = 'O'
@@ -182,7 +183,6 @@ def main():
                             inventario_modo = 'P'
 
                     elif event.key == pygame.K_s:
-                        #guardar en json la partida
                         puntaje = Puntaje(
                             ingresos=trabajador.estado.ingresos,
                             bonos=bono, 
@@ -196,16 +196,14 @@ def main():
                             
                         guardador_binario.guardar_partida(trabajador, clima, pedidos)
 
-                    elif event.key == pygame.K_l:#usuario escoge entre los que tienen finalizado == False
-                        partidas_anteriores = historial.datos_cargados
+                    elif event.key == pygame.K_l:
+                        partida_anterior = historial._cargar()
                         opciones = []
                         indices_mapeados = []
                         
                         for idx, op in enumerate(partidas_anteriores):
                             if op["finalizado"] is False:
                                 opciones.append(op)
-                                indices_mapeados.append(idx)
-                        #imprimir opciones 
                         sel = mostrar_opciones(opciones)
 
                         if sel >= 0 and sel < len(opciones):
@@ -217,30 +215,15 @@ def main():
                         elif sel != -1:                         
                             mostrar_error()
 
-                        #se debe cargar la partida
-
-                    elif event.key == pygame.K_u:
-                        nuevos_pedidos, nuevo_trabajador, nuevo_bono, nueva_penalizacion = dehacer_pasos(movimientos)
-                        if nuevos_pedidos is not None:
-                            pedidos = nuevos_pedidos
-                            bono = nuevo_bono
-                            penalizaciones = nueva_penalizacion
-                            trabajador.restaurar_estado(nuevo_trabajador, pedidos)
-                        else:
-                            messagebox.showinfo("Retroceso de movimientos","No hay movimientos para deshacer.")
-                        
-
-
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
+                        movio_este_ciclo = True  # ← NUEVO
                         trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
-                        agregar_pasos(movimientos, pedidos, trabajador, bono, penalizaciones)
 
-            teclas = pygame.key.get_pressed()
-
-            if not any(teclas):
+            if not movio_este_ciclo:  # ← NUEVO
                 clima.actualizar()
                 trabajador.estado.recuperar_resistencia(dt)
-                velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
+
+            velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
             
             for pedido in trabajador.inventario.todos_los_pedidos():
                 pedido.verificar_interaccion(
