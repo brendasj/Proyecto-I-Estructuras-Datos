@@ -9,6 +9,7 @@ from datos_clima import ClimaMarkov
 from pedidos import Pedidos
 from puntaje import Puntaje
 from puntajes import Puntajes
+from gestor_binario import Gestor_Binarios
 
 from collections import deque
 from tkinter import messagebox
@@ -106,6 +107,8 @@ def main():
 
         historial = Puntajes()
 
+        guardador_binario = Gestor_Binarios()
+
         indice_partida_cargada = -1
 
         clock = pygame.time.Clock()
@@ -190,6 +193,8 @@ def main():
                             historial.actualizar(indice_partida_cargada, puntaje)
                         else:
                             historial.agregar(puntaje)
+                            
+                        guardador_binario.guardar_partida(trabajador, clima, pedidos)
 
                     elif event.key == pygame.K_l:#usuario escoge entre los que tienen finalizado == False
                         partidas_anteriores = historial.datos_cargados
