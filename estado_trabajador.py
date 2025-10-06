@@ -11,7 +11,7 @@ class EstadoTrabajador:
             self.reputacion += cant
 
     def consumir_resistencia(self, clima, peso_actual, dt):
-        base = 1.5 * dt 
+        base = 0.5 * dt
         peso = 0.03 * dt if peso_actual > 3 else 0
 
         efecto_clima = {
@@ -26,12 +26,23 @@ class EstadoTrabajador:
         clima_factor = efecto_clima.get(estado_clima, 0.0) * dt
 
         total = base + peso + clima_factor
+
+        # 🔧 Forzar consumo mínimo si total es muy bajo
+        if total < 0.05:
+            total = 0.05
+
         self.resistencia = max(0, self.resistencia - total)
 
     def recuperar_resistencia(self, dt):
-        recuperacion_rate = 0.5
         if self.resistencia < 100:
-            self.resistencia += recuperacion_rate *dt
+            pendiente = (100 - self.resistencia) / 100
+            recuperacion_rate = 0.1 + 0.2 * pendiente 
+            incremento = recuperacion_rate * dt
+
+            if self.resistencia >= 99.5:
+                incremento = min(incremento, 0.1)
+
+            self.resistencia += incremento
             self.resistencia = min(100, self.resistencia)
 
     def sumar_ingresos(self, cantidad):

@@ -25,6 +25,7 @@ Se pierde la partida si:
 | **O** | **Lista Entrega**    | Visualiza los pedidos en el inventario ordenados por **Hora de entrga** (la más cercana primero).                            |
 | **S** | **Guardar Partida**  | Guarda el estado actual de la partida (ingresos, bonos, penalizaciones, estado de finalización) en el historial de puntajes. |
 | **L** | **Cargar Partida**   | Muestra un listado de partidas guardadas que **no han finalizado** para que el usuario pueda reanudar una.                   |
+| **U** | **Retroceder pasos**   | Permite retroceder los pasos anteriores.                   |
 
 
 # Estructuras de Datos que se utilizaron

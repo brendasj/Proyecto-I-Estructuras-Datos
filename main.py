@@ -20,7 +20,7 @@ import time
 def dehacer_pasos(mov):
     if len(mov) > 0:
         movimiento_saliente = mov.pop()
-        pedidos = movimiento_saliente[0]
+        pedidos = Pedidos(movimiento_saliente[0])
         trabajador = movimiento_saliente[1]
         bonos = movimiento_saliente[2]
         penalizaciones = movimiento_saliente[3]
@@ -120,6 +120,8 @@ def main():
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
 
+            movio_este_ciclo = False  # ← NUEVO
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -148,7 +150,6 @@ def main():
                                 penalizaciones += 3 
                                 pedidos_tratados += 1
                         agregar_pasos(movimientos,pedidos, trabajador, bono, penalizaciones)
-
 
                     elif event.key == pygame.K_o:
                         if trabajador.inventario:
@@ -203,15 +204,14 @@ def main():
                         else:
                             messagebox.showinfo("Retroceso de movimientos","No hay movimientos para deshacer.")
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
+                        movio_este_ciclo = True  # ← NUEVO
                         trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
-                        agregar_pasos(movimientos, pedidos, trabajador, bono, penalizaciones)
 
-            teclas = pygame.key.get_pressed()
-
-            if not any(teclas):
+            if not movio_este_ciclo:  # ← NUEVO
                 clima.actualizar()
                 trabajador.estado.recuperar_resistencia(dt)
-                velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
+
+            velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
             
             for pedido in trabajador.inventario.todos_los_pedidos():
                 pedido.verificar_interaccion(
