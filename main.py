@@ -115,6 +115,8 @@ def main():
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
 
+            movio_este_ciclo = False  # ← NUEVO
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -142,7 +144,6 @@ def main():
                                 penalizaciones += 3 
                                 pedidos_tratados += 1
 
-
                     elif event.key == pygame.K_o:
                         if trabajador.inventario:
                             inventario_modo = 'O'
@@ -152,7 +153,6 @@ def main():
                             inventario_modo = 'P'
 
                     elif event.key == pygame.K_s:
-                        #guardar en json la partida
                         puntaje = Puntaje(
                             ingresos=trabajador.estado.ingresos,
                             bonos=bono, 
@@ -161,13 +161,12 @@ def main():
                         )
                         historial.agregar(puntaje)
 
-                    elif event.key == pygame.K_l:#usuario escoge entre los que tienen finalizado == False
+                    elif event.key == pygame.K_l:
                         partida_anterior = historial._cargar()
                         opciones = []
                         for op in partida_anterior:
                             if op["finalizado"] is False:
                                 opciones.append(op)
-                        #imprimir opciones 
                         sel = mostrar_opciones(opciones)
                         if sel >= 0 and sel < len(opciones):
                             trabajador.estado.ingresos = opciones[sel]["ingresos"]
@@ -176,17 +175,15 @@ def main():
                         else:                         
                             mostrar_error()
 
-                        #se debe cargar la partida
-
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
+                        movio_este_ciclo = True  # ← NUEVO
                         trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
-            
-            teclas = pygame.key.get_pressed()
 
-            if not any(teclas):
+            if not movio_este_ciclo:  # ← NUEVO
                 clima.actualizar()
                 trabajador.estado.recuperar_resistencia(dt)
-                velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
+
+            velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
             
             for pedido in trabajador.inventario.todos_los_pedidos():
                 pedido.verificar_interaccion(

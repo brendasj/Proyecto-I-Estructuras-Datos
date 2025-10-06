@@ -16,5 +16,71 @@
         "bonos": 0,
         "penalizaciones": 0,
         "finalizado": false
+    },
+    {
+        "ingresos": 260.0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 260.0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 1152.5,
+        "bonos": 57.625,
+        "penalizaciones": 0,
+        "finalizado": true
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 0,
+        "finalizado": false
     }
 ]
