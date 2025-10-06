@@ -7,10 +7,10 @@ Se pierde la partida si:
 2. Cuando todos los pedidos hayan sido gestionados pero no se ha alcanzado la meta de ingresos indicada. 
 
 # Factores del juego
-**Resistencia:** Disminuye al moverse y se ve más afectada cuando hay peso o un clima díficil. Cuando esta llega a 0 debe de descansar para recuperarse.
-**Reputación:** Aumenta al entregar pedidos a tiempo (+10) y disminuye si se entregan tarde (-5) o si se rechaza un pedido (-3). Una reputación alta (>= 90) otorga un bonus del 5% al pago de los pedidos
-**Inventario:** El inventario tiene un peso máximo, no se pueden agregar más pedidos al inventario si se sobrepasa ese peso. 
-**Clima:** El clima cambia periódicamente (cada 45-60 segundos) y afecta la velocidad y resistencia del trabajador.
+- **Resistencia:** Disminuye al moverse y se ve más afectada cuando hay peso o un clima díficil. Cuando esta llega a 0 debe de descansar para recuperarse.
+- **Reputación:** Aumenta al entregar pedidos a tiempo (+10) y disminuye si se entregan tarde (-5) o si se rechaza un pedido (-3). Una reputación alta (>= 90) otorga un bonus del 5% al pago de los pedidos 
+- **Inventario:** El inventario tiene un peso máximo, no se pueden agregar más pedidos al inventario si se sobrepasa ese peso. 
+- **Clima:** El clima cambia periódicamente (cada 45-60 segundos) y afecta la velocidad y resistencia del trabajador.
 
 # Controles y teclas
 | Tecla | Acción               | Descripción |
