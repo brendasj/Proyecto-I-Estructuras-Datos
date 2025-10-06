@@ -190,8 +190,6 @@ def main():
                             else:
                                 inventario = trabajador.inventario.visualizar_por_prioridad() 
                             
-                            total_pedidos = pedidos.cantidad_pedidos()
-                            
                             velocidad_actual = trabajador.obtener_velocidad(clima, mapa) 
 
                     elif event.key == pygame.K_u:
