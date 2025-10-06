@@ -12,9 +12,9 @@
         "finalizado": true
     },
     {
-        "ingresos": 0,
+        "ingresos": 450.0,
         "bonos": 0,
-        "penalizaciones": 0,
+        "penalizaciones": 6,
         "finalizado": false
     },
     {

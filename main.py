@@ -106,6 +106,8 @@ def main():
 
         historial = Puntajes()
 
+        indice_partida_cargada = -1
+
         clock = pygame.time.Clock()
         tiempo_juego = 0
         incluido = True
@@ -184,20 +186,29 @@ def main():
                             penalizaciones=penalizaciones,
                             finalizado=final
                         )
-                        historial.agregar(puntaje)
+                        if indice_partida_cargada != -1:
+                            historial.actualizar(indice_partida_cargada, puntaje)
+                        else:
+                            historial.agregar(puntaje)
 
                     elif event.key == pygame.K_l:#usuario escoge entre los que tienen finalizado == False
-                        partida_anterior = historial._cargar()
+                        partidas_anteriores = historial.datos_cargados
                         opciones = []
-                        for op in partida_anterior:
+                        indices_mapeados = []
+                        
+                        for idx, op in enumerate(partidas_anteriores):
                             if op["finalizado"] is False:
                                 opciones.append(op)
+                                indices_mapeados.append(idx)
                         #imprimir opciones 
                         sel = mostrar_opciones(opciones)
+
                         if sel >= 0 and sel < len(opciones):
                             trabajador.estado.ingresos = opciones[sel]["ingresos"]
                             bono = opciones[sel]["bonos"]
                             penalizaciones = opciones[sel]["penalizaciones"]
+
+                            indice_partida_cargada = indices_mapeados[sel]
                         else:                         
                             mostrar_error()
 
@@ -282,7 +293,10 @@ def main():
             finalizado = final
         )
 
-        historial.agregar(puntaje_final)
+        if indice_partida_cargada != 1:
+            historial.actualizar(indice_partida_cargada, puntaje_final)
+        else:
+            historial.agregar(puntaje_final)
     else:
         print("No se pudo cargar el mapa. Saliendo del programa.")
 
