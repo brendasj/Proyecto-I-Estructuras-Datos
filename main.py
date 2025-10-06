@@ -209,7 +209,7 @@ def main():
                             penalizaciones = opciones[sel]["penalizaciones"]
 
                             indice_partida_cargada = indices_mapeados[sel]
-                        else:                         
+                        elif sel != -1:                         
                             mostrar_error()
 
                         #se debe cargar la partida
