@@ -41,6 +41,15 @@ class Trabajador:
                 return False
         return True
 
+    def restaurar_estado(self, estado_guardado, pedidos):
+        self.pedido_actual = estado_guardado["pedido_actual"]
+        self.inventario = estado_guardado["inventario"]
+        for i in pedidos:
+            self.inventario.agregar_pedido(i)
+        self.estado = estado_guardado["estado"]
+        self.entregados = estado_guardado["entregados"]
+        self.trabajadorRect = estado_guardado["trabajadorRect"]
+        
     def obtener_velocidad(self, clima, mapa):
         efecto_clima = clima.efecto_trabajador()
         clima_velocidad = efecto_clima.get("velocidad", 1.0)
