@@ -1,4 +1,5 @@
 import pygame
+import copy
 from datetime import datetime
 from api_client import ApiClient
 from mapa import Mapa
@@ -9,12 +10,34 @@ from pedidos import Pedidos
 from puntaje import Puntaje
 from puntajes import Puntajes
 
+from collections import deque
 from tkinter import messagebox
 import tkinter as tk
 from tkinter import simpledialog
 
+def dehacer_pasos(mov):
+    if len(mov) > 0:
+        movimiento_saliente = mov.pop()
+        pedidos = movimiento_saliente[0]
+        trabajador = movimiento_saliente[1]
+        bonos = movimiento_saliente[2]
+        penalizaciones = movimiento_saliente[3]
+        return pedidos, trabajador, bonos, penalizaciones
+    return None, None, None, None
+
+
+def agregar_pasos(mov, pedidos, trabajador, bonos, penalizaciones):
+    nuevo = [
+        copy.deepcopy(pedidos),
+        trabajador.obtener_estado(),  
+        bonos,
+        penalizaciones
+    ]
+    mov.append(nuevo)
+
 
 def mostrar_estado_final(resultado):
+    movimientos=None
     root = tk.Tk()
     root.withdraw()
 
@@ -91,7 +114,7 @@ def main():
 
         total_pedidos = pedidos.cantidad_pedidos()
         pedidos_tratados = 0
-
+        movimientos = []
         running = True
         while running:
 
@@ -130,6 +153,7 @@ def main():
                                     inventario = trabajador.inventario.visualizar_por_prioridad() 
                             else:
                                 incluido = False
+                        agregar_pasos(movimientos,pedidos, trabajador, bono, penalizaciones)
 
                     elif event.key == pygame.K_r:
                         if pedidos.pedidos:
@@ -138,6 +162,7 @@ def main():
                                 trabajador.estado.modificar_reputacion(-3)
                                 penalizaciones += 3 
                                 pedidos_tratados += 1
+                        agregar_pasos(movimientos,pedidos, trabajador, bono, penalizaciones)
 
 
                     elif event.key == pygame.K_o:
@@ -175,9 +200,22 @@ def main():
 
                         #se debe cargar la partida
 
+                    elif event.key == pygame.K_u:
+                        nuevos_pedidos, nuevo_trabajador, nuevo_bono, nueva_penalizacion = dehacer_pasos(movimientos)
+                        if nuevos_pedidos is not None:
+                            pedidos = nuevos_pedidos
+                            bono = nuevo_bono
+                            penalizaciones = nueva_penalizacion
+                            trabajador.restaurar_estado(nuevo_trabajador)
+                        else:
+                            messagebox.showinfo("Retroceso de movimientos","No hay movimientos para deshacer.")
+                        
+
+
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
                         trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
-            
+                        agregar_pasos(movimientos, pedidos, trabajador, bono, penalizaciones)
+
             teclas = pygame.key.get_pressed()
 
             if not any(teclas):
