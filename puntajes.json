@@ -2,31 +2,46 @@
     {
         "ingresos": 560.0,
         "bonos": 0,
-        "penalizaciones": 3,
-        "finalizado": false
+        "penalizaciones": 3
     },
     {
         "ingresos": 1135.0,
         "bonos": 56.75,
-        "penalizaciones": 3,
-        "finalizado": true
+        "penalizaciones": 3
     },
     {
         "ingresos": 450.0,
         "bonos": 0,
-        "penalizaciones": 6,
-        "finalizado": false
+        "penalizaciones": 6
     },
     {
         "ingresos": 520.0,
         "bonos": 0,
-        "penalizaciones": 0,
-        "finalizado": false
+        "penalizaciones": 0
     },
     {
-        "ingresos": 410.0,
+        "ingresos": 260.0,
         "bonos": 0,
-        "penalizaciones": 6,
-        "finalizado": false
+        "penalizaciones": 6
+    },
+    {
+        "ingresos": 1152.5,
+        "bonos": 57.625,
+        "penalizaciones": 0
+    },
+    {
+        "ingresos": 1152.5,
+        "bonos": 57.625,
+        "penalizaciones": 0
+    },
+    {
+        "ingresos": 557.5,
+        "bonos": 27.875,
+        "penalizaciones": 6
+    },
+    {
+        "ingresos": 180.0,
+        "bonos": 0,
+        "penalizaciones": 12
     }
 ]

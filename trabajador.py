@@ -5,6 +5,7 @@ from estado_trabajador import EstadoTrabajador
 import copy
 class Trabajador:
     contador = False
+
     def __init__(self, mapa_width, mapa_height, cell_size, peso_maximo=5, velocidad_estandar=3):
         self.mapa_width = mapa_width
         self.mapa_height = mapa_height
@@ -22,25 +23,23 @@ class Trabajador:
         self.trabajadorRect = self.trabajador.get_rect()
         self.trabajadorRect.center = (mapa_width // 2 * cell_size, mapa_height // 2 * cell_size)
 
+        self.movio = False  
+
     def es_transitable(self, rect, mapa):
-      puntos = [
-        rect.topleft,
-        rect.topright,
-        rect.bottomleft,
-        rect.bottomright,
-        rect.center,
-        (rect.left + rect.width // 2, rect.top),      # borde superior
-        (rect.left + rect.width // 2, rect.bottom),   # borde inferior
-        (rect.left, rect.top + rect.height // 2),     # borde izquierdo
-        (rect.right, rect.top + rect.height // 2),    # borde derecho
-    ]
-      for x, y in puntos:
+        puntos = [
+            rect.topleft, rect.topright, rect.bottomleft, rect.bottomright, rect.center,
+            (rect.left + rect.width // 2, rect.top),
+            (rect.left + rect.width // 2, rect.bottom),
+            (rect.left, rect.top + rect.height // 2),
+            (rect.right, rect.top + rect.height // 2),
+        ]
+        for x, y in puntos:
             x_celda = int(x / self.cell_size)
             y_celda = int(y / self.cell_size)
             celda = mapa.obtener_celda(x_celda, y_celda)
             if celda in ['B', ' '] :  # edificio
                return False    
-      return True
+        return True
 
     def obtener_estado(self):
         return {
@@ -76,7 +75,7 @@ class Trabajador:
             resistencia_velocidad = 0.8
         else:
             resistencia_velocidad = 0
-        
+
         x = int(self.trabajadorRect.centerx / self.cell_size)
         y = int(self.trabajadorRect.centery / self.cell_size)
         celda_actual = mapa.obtener_celda(x, y)
@@ -90,6 +89,8 @@ class Trabajador:
         pantalla.blit(self.trabajador, self.trabajadorRect)
 
     def mover_una_celda(self, key, clima, dt, velocidad, mapa):
+        self.movio = False 
+
         if self.estado.resistencia == 0:
             Trabajador.contador = True
             self.estado.recuperar_resistencia(dt)
@@ -100,14 +101,19 @@ class Trabajador:
         else:
             Trabajador.contador = False
             dx, dy = 0, 0
+
             if key == pygame.K_UP:
                 dy = -1
+                self.movio = True
             elif key == pygame.K_DOWN:
                 dy = 1
+                self.movio = True
             elif key == pygame.K_LEFT:
                 dx = -1
+                self.movio = True
             elif key == pygame.K_RIGHT:
                 dx = 1
+                self.movio = True
 
             nuevo_rect = self.trabajadorRect.copy()
             nuevo_rect.move_ip(dx * self.cell_size, dy * self.cell_size)
@@ -116,6 +122,9 @@ class Trabajador:
                 self.trabajadorRect = nuevo_rect
                 self.estado.consumir_resistencia(clima, self.inventario.peso_actual, dt)
             else:
-                self.estado.recuperar_resistencia(dt)
+                self.movio = False 
 
             self.trabajadorRect.clamp_ip((0, 0, self.mapa_width * self.cell_size, self.mapa_height * self.cell_size))
+
+        if not self.movio:
+            self.estado.recuperar_resistencia(dt)

@@ -23,8 +23,8 @@ Se pierde la partida si:
 | **R** | **Rechazar Pedido**  | Descarta el pedido de mayor prioridad. Reduce la reputación del trabajador en 3 puntos.                                      |
 | **P** | **Lista Prioridad**  | Visualiza los pedidos en el inventario ordenados por **Prioridad** (la de mayor prioridad primero).                          |
 | **O** | **Lista Entrega**    | Visualiza los pedidos en el inventario ordenados por **Hora de entrga** (la más cercana primero).                            |
-| **S** | **Guardar Partida**  | Guarda el estado actual de la partida (ingresos, bonos, penalizaciones, estado de finalización) en el historial de puntajes. |
-| **L** | **Cargar Partida**   | Muestra un listado de partidas guardadas que **no han finalizado** para que el usuario pueda reanudar una.                   |
+| **S** | **Guardar Partida**  | Guarda el estado actual de la partida en un archivo. |
+| **L** | **Cargar Partida**   | Carga la partida anterior y se puede seguir jugando.                   |
 | **U** | **Retroceder pasos**   | Permite retroceder los pasos anteriores.                   |
 
 
