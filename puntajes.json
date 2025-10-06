@@ -22,5 +22,11 @@
         "bonos": 0,
         "penalizaciones": 0,
         "finalizado": false
+    },
+    {
+        "ingresos": 410.0,
+        "bonos": 0,
+        "penalizaciones": 6,
+        "finalizado": false
     }
 ]
