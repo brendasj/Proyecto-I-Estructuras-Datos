@@ -2,31 +2,76 @@
     {
         "ingresos": 560.0,
         "bonos": 0,
-        "penalizaciones": 3,
-        "finalizado": false
+        "penalizaciones": 3
     },
     {
         "ingresos": 1135.0,
         "bonos": 56.75,
-        "penalizaciones": 3,
-        "finalizado": true
+        "penalizaciones": 3
     },
     {
         "ingresos": 450.0,
         "bonos": 0,
-        "penalizaciones": 6,
-        "finalizado": false
+        "penalizaciones": 6
     },
     {
         "ingresos": 520.0,
         "bonos": 0,
-        "penalizaciones": 0,
-        "finalizado": false
+        "penalizaciones": 0
     },
     {
         "ingresos": 410.0,
         "bonos": 0,
-        "penalizaciones": 6,
-        "finalizado": false
+        "penalizaciones": 6
+    },
+    {
+        "ingresos": 480.0,
+        "bonos": 0,
+        "penalizaciones": 3
+    },
+    {
+        "ingresos": 866.5,
+        "bonos": 43.325,
+        "penalizaciones": 3
+    },
+    {
+        "ingresos": 868.5,
+        "bonos": 43.425000000000004,
+        "penalizaciones": 3
+    },
+    {
+        "ingresos": 300.0,
+        "bonos": 0,
+        "penalizaciones": 3
+    },
+    {
+        "ingresos": 180.0,
+        "bonos": 0,
+        "penalizaciones": 6
+    },
+    {
+        "ingresos": 330.0,
+        "bonos": 0,
+        "penalizaciones": 9
+    },
+    {
+        "ingresos": 400.0,
+        "bonos": 0,
+        "penalizaciones": 9
+    },
+    {
+        "ingresos": 260.0,
+        "bonos": 0,
+        "penalizaciones": 0
+    },
+    {
+        "ingresos": 559.0,
+        "bonos": 27.950000000000003,
+        "penalizaciones": 6
+    },
+    {
+        "ingresos": 641.0,
+        "bonos": 32.050000000000004,
+        "penalizaciones": 6
     }
 ]

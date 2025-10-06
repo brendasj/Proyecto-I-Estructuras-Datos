@@ -15,6 +15,7 @@ from collections import deque
 from tkinter import messagebox
 import tkinter as tk
 from tkinter import simpledialog
+import time
 
 def dehacer_pasos(mov):
     if len(mov) > 0:
@@ -38,7 +39,6 @@ def agregar_pasos(mov, pedidos, trabajador, bonos, penalizaciones):
 
 
 def mostrar_estado_final(resultado):
-    movimientos=None
     root = tk.Tk()
     root.withdraw()
 
@@ -51,33 +51,10 @@ def mostrar_estado_final(resultado):
         titulo = "DERROTA"
         mensaje = f"Perdiste, no alcanzaste los objetivos"
         messagebox.showinfo(titulo, mensaje)
-
+    
+    root.update()
+    time.sleep(0.5)
     root.destroy()
-
-def mostrar_error():
-    root = tk.Tk()
-    root.withdraw()
-    messagebox.showinfo("Error", "Opción no válida")
-
-    root.destroy()
-
-def mostrar_opciones(op):
-    titulo = "Partidas disponibles"
-    mensaje ="Seleccione una opción de partida"
-    impresion = ""
-    contador = 1
-    for i in op:
-        dato1 = "Ingresos: " + str(i["ingresos"])
-        dato2 = " Bonos: " + str(i["bonos"])
-        dato3 = " Penalización: " + str(i["penalizaciones"])
-        impresion += "Opcion " + str(contador) + "\n" + dato1 + dato2 + dato3 + "\n"
-        contador += 1
-
-    select = simpledialog.askinteger(titulo,impresion)
-    if select is not None:
-        return select - 1
-    else:
-        return -1
 
 def main():
     pygame.init()
@@ -96,7 +73,7 @@ def main():
 
     if datos:
         bono = 0
-        final = False
+        resultado_final = None
         mapa = Mapa(datos)
         visualizador = Visualizador(mapa, cell_size)
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
@@ -108,8 +85,6 @@ def main():
         historial = Puntajes()
 
         guardador_binario = Gestor_Binarios()
-
-        indice_partida_cargada = -1
 
         clock = pygame.time.Clock()
         tiempo_juego = 0
@@ -123,22 +98,24 @@ def main():
         total_pedidos = pedidos.cantidad_pedidos()
         pedidos_tratados = 0
         movimientos = []
+        velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
         running = True
         while running:
 
             if trabajador.estado.ingresos >= params["goal"]:
                 running = False
-                mostrar_estado_final("victoria")
-                final = True
+                resultado_final = "victoria"
+                mostrar_estado_final(resultado_final)
                 
             elif trabajador.estado.reputacion < 20:
-                final = True
                 running = False
-                mostrar_estado_final("derrota")
-            elif total_pedidos == pedidos_tratados and trabajador.estado.ingresos < params["goal"] and trabajador.inventario.esta_vacia():
+                resultado_final = "derrota"
+                mostrar_estado_final(resultado_final)
+
+            elif not pedidos.pedidos and trabajador.inventario.esta_vacia() and trabajador.estado.ingresos < params["goal"]:
                 running = False
-                mostrar_estado_final("derrota")
-                final = False
+                resultado_final = "derrota"
+                mostrar_estado_final(resultado_final)
 
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
@@ -182,42 +159,39 @@ def main():
                             inventario_modo = 'P'
 
                     elif event.key == pygame.K_s:
-                        #guardar en json la partida
-                        puntaje = Puntaje(
-                            ingresos=trabajador.estado.ingresos,
-                            bonos=bono, 
-                            penalizaciones=penalizaciones,
-                            finalizado=final
+                        guardador_binario.guardar_partida(
+                            trabajador, clima, pedidos, pedidos_tratados, bono, penalizaciones
                         )
-                        if indice_partida_cargada != -1:
-                            historial.actualizar(indice_partida_cargada, puntaje)
-                        else:
-                            historial.agregar(puntaje)
+
+                    elif event.key == pygame.K_l:
+                        estado_cargado = guardador_binario.cargar_partida()
+
+                        if estado_cargado:
+                            trabajador.trabajadorRect.centerx = estado_cargado['center_x']
+                            trabajador.trabajadorRect.centery = estado_cargado['center_y']
+
+                            trabajador.estado.resistencia = estado_cargado['resistencia']
+                            trabajador.estado.reputacion = estado_cargado['reputacion']
+
+                            trabajador.estado.ingresos = estado_cargado['ingresos']
+
+                            clima.estado = estado_cargado['clima_actual']
                             
-                        guardador_binario.guardar_partida(trabajador, clima, pedidos)
+                            pedidos.pedidos = estado_cargado['pedidos_pendientes']
+                            trabajador.inventario = estado_cargado['inventario_completo']
+                            list(trabajador.inventario.todos_los_pedidos())
+                            pedidos_tratados = estado_cargado['pedidos_tratados_cuenta']
+                            bono = estado_cargado['bono_acumulado']
+                            penalizaciones = estado_cargado['penalizaciones_acumuladas']
 
-                    elif event.key == pygame.K_l:#usuario escoge entre los que tienen finalizado == False
-                        partidas_anteriores = historial.datos_cargados
-                        opciones = []
-                        indices_mapeados = []
-                        
-                        for idx, op in enumerate(partidas_anteriores):
-                            if op["finalizado"] is False:
-                                opciones.append(op)
-                                indices_mapeados.append(idx)
-                        #imprimir opciones 
-                        sel = mostrar_opciones(opciones)
-
-                        if sel >= 0 and sel < len(opciones):
-                            trabajador.estado.ingresos = opciones[sel]["ingresos"]
-                            bono = opciones[sel]["bonos"]
-                            penalizaciones = opciones[sel]["penalizaciones"]
-
-                            indice_partida_cargada = indices_mapeados[sel]
-                        elif sel != -1:                         
-                            mostrar_error()
-
-                        #se debe cargar la partida
+                            if inventario_modo == 'O':
+                                inventario = trabajador.inventario.visualizar_por_entrega()
+                            else:
+                                inventario = trabajador.inventario.visualizar_por_prioridad() 
+                            
+                            total_pedidos = pedidos.cantidad_pedidos()
+                            
+                            velocidad_actual = trabajador.obtener_velocidad(clima, mapa) 
 
                     elif event.key == pygame.K_u:
                         nuevos_pedidos, nuevo_trabajador, nuevo_bono, nueva_penalizacion = dehacer_pasos(movimientos)
@@ -228,9 +202,6 @@ def main():
                             trabajador.restaurar_estado(nuevo_trabajador)
                         else:
                             messagebox.showinfo("Retroceso de movimientos","No hay movimientos para deshacer.")
-                        
-
-
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
                         trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
                         agregar_pasos(movimientos, pedidos, trabajador, bono, penalizaciones)
@@ -284,7 +255,7 @@ def main():
                     visualizador.resaltar_celda(pedido.dropoff[0], pedido.dropoff[1], (255, 255, 0, 100), "↓")
 
             pygame.display.flip()
-        
+
         if trabajador.estado.reputacion >= 90:
             bno = 0.05 * trabajador.estado.ingresos
             bono += bno
@@ -295,16 +266,13 @@ def main():
             ingresos = trabajador.estado.ingresos,
             bonos = bono, 
             penalizaciones = penalizaciones,
-            finalizado = final
         )
 
-        if indice_partida_cargada != 1:
-            historial.actualizar(indice_partida_cargada, puntaje_final)
-        else:
-            historial.agregar(puntaje_final)
+        historial.agregar(puntaje_final)
     else:
         print("No se pudo cargar el mapa. Saliendo del programa.")
 
 if __name__ == "__main__":
     main()
+    time.sleep(1) 
     pygame.quit()
