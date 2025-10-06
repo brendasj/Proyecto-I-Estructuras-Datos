@@ -26,7 +26,6 @@ class EstadoTrabajador:
 
         total = base + peso + clima_factor
 
-        # 🔧 Forzar consumo mínimo si total es muy bajo
         if total < 0.05:
             total = 0.05
 
