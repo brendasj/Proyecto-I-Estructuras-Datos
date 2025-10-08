@@ -16,7 +16,10 @@ from tkinter import messagebox
 import tkinter as tk
 from tkinter import simpledialog
 import time
+     
 
+
+     
 def mostrar_error():
     root = tk.Tk()
     root.withdraw()

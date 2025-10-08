@@ -43,5 +43,20 @@
         "ingresos": 180.0,
         "bonos": 0,
         "penalizaciones": 12
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 3
+    },
+    {
+        "ingresos": 0,
+        "bonos": 0,
+        "penalizaciones": 6
+    },
+    {
+        "ingresos": 921.5,
+        "bonos": 46.075,
+        "penalizaciones": 0
     }
 ]
