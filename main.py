@@ -1,30 +1,34 @@
-import pygame
+"""Entrada principal del juego: inicialización y bucle principal.
+
+Este módulo contiene la función `main()` que carga recursos, crea el mapa,
+inicializa el visualizador y gestiona el bucle del juego.
+"""
+
 import copy
+from collections import deque
 from datetime import datetime
+import time
+import tkinter as tk
+from tkinter import messagebox, simpledialog
+
+import pygame
+
 from api_client import ApiClient
+from gestor_binario import Gestor_Binarios
 from mapa import Mapa
-from visualizador import Visualizador
-from trabajador import Trabajador
-from datos_clima import ClimaMarkov
 from pedidos import Pedidos
 from puntaje import Puntaje
 from puntajes import Puntajes
-from gestor_binario import Gestor_Binarios
-
-from collections import deque
-from tkinter import messagebox
-import tkinter as tk
-from tkinter import simpledialog
-import time
-     
+from trabajador import Trabajador
+from visualizador import Visualizador
+from datos_clima import ClimaMarkov
 
 
-     
-def mostrar_error():
+def mostrar_error() -> None:
+    """Muestra un cuadro de diálogo indicando que la opción no es válida."""
     root = tk.Tk()
     root.withdraw()
     messagebox.showinfo("Error", "Opción no válida")
-
     root.destroy()
 
 def mostrar_opciones(op):

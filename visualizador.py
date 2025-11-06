@@ -1,13 +1,27 @@
-import pygame
+"""Visualización del mapa y panel lateral usando pygame.
+
+Contiene la clase `Visualizador` que se encarga de dibujar el mapa,
+el panel lateral y elementos de HUD.
+"""
+
 import os
+import pygame
+from typing import Any
+
 
 class Visualizador:
-    def __init__(self, mapa, cell_size):
+    """Dibuja el mapa y los elementos UI sobre una pantalla de pygame.
+
+    No modifica el estado del juego; solo presenta información.
+    """
+
+    def __init__(self, mapa: Any, cell_size: int) -> None:
         pygame.init()
-        self.fondo_calles = pygame.image.load(os.path.join("assets", "calle4.png"))
+        self.fondo_calles = pygame.image.load(
+            os.path.join("assets", "calle4.png")
+        )
         self.fondo_calles = pygame.transform.scale(
-            self.fondo_calles,
-            (mapa.width * cell_size, mapa.height * cell_size)
+            self.fondo_calles, (mapa.width * cell_size, mapa.height * cell_size)
         )
         self.mapa = mapa
         self.cell_size = cell_size
@@ -20,40 +34,59 @@ class Visualizador:
         pygame.display.set_caption(f"Mapa de {mapa.name}")
 
         self.sprites_base = {
-            'C': pygame.image.load(os.path.join("assets", "calle4.png")),
-            'B': pygame.image.load(os.path.join("assets", "edificio.png")),
-            'P': pygame.image.load(os.path.join("assets", "parque.png"))
+            "C": pygame.image.load(os.path.join("assets", "calle4.png")),
+            "B": pygame.image.load(os.path.join("assets", "edificio.png")),
+            "P": pygame.image.load(os.path.join("assets", "parque.png")),
         }
-        self.sprites_base['P'] = pygame.transform.scale(self.sprites_base['P'], (24, 24))
+        self.sprites_base["P"] = pygame.transform.scale(self.sprites_base["P"], (24, 24))
 
         self.sprites_grandes = {}
 
-    def dibujar(self):
+    def dibujar(self) -> None:
+        """Dibuja el fondo y las celdas del mapa en la pantalla."""
         self.screen.blit(self.fondo_calles, (0, 0))
         matriz = self.mapa.obtener_matriz()
         for y, fila in enumerate(matriz):
             for x, celda in enumerate(fila):
-                if celda == 'P':
-                    sprite = pygame.transform.scale(self.sprites_base.get(celda), (self.cell_size, self.cell_size))
+                if celda == "P":
+                    sprite = pygame.transform.scale(
+                        self.sprites_base.get(celda), (self.cell_size, self.cell_size)
+                    )
                     self.screen.blit(sprite, (x * self.cell_size, y * self.cell_size))
 
-                elif celda == 'B':
-                    sprite = pygame.transform.scale(self.sprites_base.get(celda), (self.cell_size, self.cell_size))
+                elif celda == "B":
+                    sprite = pygame.transform.scale(
+                        self.sprites_base.get(celda), (self.cell_size, self.cell_size)
+                    )
                     self.screen.blit(sprite, (x * self.cell_size, y * self.cell_size))
 
-                elif celda.startswith('B_('):
+                elif isinstance(celda, str) and celda.startswith("B_("):
                     if celda not in self.sprites_grandes:
-                        partes = celda.replace(')', '').split('(')[1].split('x')
+                        partes = celda.replace(")", "").split("(")[1].split("x")
                         ancho_bloque = int(partes[0])
                         alto_bloque = int(partes[1])
-                        base_sprite = self.sprites_base['B']
+                        base_sprite = self.sprites_base["B"]
                         nuevo_tamano = (self.cell_size * ancho_bloque, self.cell_size * alto_bloque)
                         self.sprites_grandes[celda] = pygame.transform.scale(base_sprite, nuevo_tamano)
 
                     sprite_grande = self.sprites_grandes.get(celda)
                     self.screen.blit(sprite_grande, (x * self.cell_size, y * self.cell_size))
 
-    def dibujar_panel_lateral(self, dificultad, clima, jugador, jugador_ia, pedidos_disponible, pedidos_inventario_trabajador, pedidos_inventario_ia, incluido, velocidad_trabajador, velocidad_ia, meta=None):
+    def dibujar_panel_lateral(
+        self,
+        dificultad: str,
+        clima: Any,
+        jugador: Any,
+        jugador_ia: Any,
+        pedidos_disponible: list,
+        pedidos_inventario_trabajador: list,
+        pedidos_inventario_ia: list,
+        incluido: bool,
+        velocidad_trabajador: float,
+        velocidad_ia: float,
+        meta: Any = None,
+    ) -> None:
+        """Dibuja el panel lateral con información del jugador y pedidos."""
         x_panel = self.mapa.width * self.cell_size
         y_panel = 0
         alto_total = self.mapa.height * self.cell_size
@@ -83,25 +116,42 @@ class Visualizador:
             pedidos_inventario=pedidos_inventario_trabajador,
             incluido=incluido,
             meta=meta,
-            velocidad=velocidad_trabajador
+            velocidad=velocidad_trabajador,
         )
 
-        pygame.draw.line(self.screen, (120, 120, 120), (x_panel + margen, y_actual + 5), (x_panel + 250, y_actual + 5), 2)
+        pygame.draw.line(
+            self.screen, (120, 120, 120), (x_panel + margen, y_actual + 5), (x_panel + 250, y_actual + 5), 2
+        )
         y_actual += 15
 
         self.panel_jugador(
-        titulo="Jugador IA",
-        x_panel=x_panel,
-        y_inicio=y_actual + 10,
-        jugador=jugador_ia,  
-        pedidos_disponible=pedidos_disponible,
-        pedidos_inventario=pedidos_inventario_ia,
-        incluido=incluido,
-        meta=meta,
-        velocidad=velocidad_ia
+            titulo="Jugador IA",
+            x_panel=x_panel,
+            y_inicio=y_actual + 10,
+            jugador=jugador_ia,
+            pedidos_disponible=pedidos_disponible,
+            pedidos_inventario=pedidos_inventario_ia,
+            incluido=incluido,
+            meta=meta,
+            velocidad=velocidad_ia,
         )
 
-    def panel_jugador(self, titulo, x_panel, y_inicio, jugador, pedidos_disponible, pedidos_inventario, incluido, meta, velocidad):
+    def panel_jugador(
+        self,
+        titulo: str,
+        x_panel: int,
+        y_inicio: int,
+        jugador: Any,
+        pedidos_disponible: list,
+        pedidos_inventario: list,
+        incluido: bool,
+        meta: Any,
+        velocidad: float,
+    ) -> int:
+        """Dibuja la sección de información de un jugador en el panel lateral.
+
+        Retorna la coordenada y actualizada (int) para seguir dibujando.
+        """
         font_titulo = pygame.font.SysFont("Arial", 16, bold=True)
         font_contenido = pygame.font.SysFont("Arial", 14)
         color_titulo = (0, 0, 80)
@@ -158,11 +208,11 @@ class Visualizador:
 
             # Color dinámico: azul, celeste, gris
             if reputacion > 70:
-                color_barra = (0, 120, 255)       # azul fuerte
+                color_barra = (0, 120, 255)  # azul fuerte
             elif reputacion > 40:
-                color_barra = (100, 180, 255)     # celeste
+                color_barra = (100, 180, 255)  # celeste
             else:
-                color_barra = (150, 150, 150)     # gris
+                color_barra = (150, 150, 150)  # gris
 
             pygame.draw.rect(self.screen, (180, 180, 180), (x_barra, y_barra, barra_ancho, barra_alto))
             pygame.draw.rect(self.screen, color_barra, (x_barra, y_barra, ancho_lleno, barra_alto))
@@ -202,8 +252,8 @@ class Visualizador:
         texto_peso = f"Peso: {peso}"
         self.screen.blit(font_titulo.render(texto_peso, True, color_titulo), (x_panel + margen, y_actual))
         y_actual += 20
-        if incluido == False:
-            texto = f"Peso máximo alcanzado"
+        if not incluido:
+            texto = "Peso máximo alcanzado"
             self.screen.blit(font_contenido.render(texto, True, (0, 0, 255)), (x_panel + margen, y_actual))
             y_actual += 15
 
@@ -228,28 +278,32 @@ class Visualizador:
             porcentaje = min(1.0, ingresos / meta)
             ancho_lleno = int(barra_ancho * porcentaje)
 
-            color_barra = (0, 150, 255) if porcentaje < 1.0 else (0, 200, 100)  # azul o verde si completado
+            color_barra = (0, 150, 255) if porcentaje < 1.0 else (0, 200, 100)
 
             pygame.draw.rect(self.screen, (180, 180, 180), (x_barra, y_barra, barra_ancho, barra_alto))
             pygame.draw.rect(self.screen, color_barra, (x_barra, y_barra, ancho_lleno, barra_alto))
             y_actual += barra_alto + 10
-        
+
         return y_actual
 
-    def resaltar_celda(self, x, y, color, texto=None):
+    def resaltar_celda(self, x: int, y: int, color: tuple, texto: str | None = None) -> None:
+        """Resalta una celda del mapa con un overlay semitransparente.
+
+        Si se proporciona `texto`, lo dibuja centrado sobre la celda.
+        """
         font_numero = pygame.font.SysFont("Arial", 12, bold=True)
 
         x_pixel = x * self.cell_size
         y_pixel = y * self.cell_size
 
         s = pygame.Surface((self.cell_size, self.cell_size), pygame.SRCALPHA)
-        s.fill(color) 
+        s.fill(color)
         self.screen.blit(s, (x_pixel, y_pixel))
 
         if texto:
             color_texto = (255, 255, 255)
             superficie_texto = font_numero.render(texto, True, color_texto)
-        
+
             x_centrado = x_pixel + (self.cell_size - superficie_texto.get_width()) // 2
-            y_centrado = y_pixel + (self.cell_size - superficie_texto.get_height()) // 2 
+            y_centrado = y_pixel + (self.cell_size - superficie_texto.get_height()) // 2
             self.screen.blit(superficie_texto, (x_centrado, y_centrado))
