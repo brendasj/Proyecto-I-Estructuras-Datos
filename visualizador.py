@@ -53,7 +53,7 @@ class Visualizador:
                     sprite_grande = self.sprites_grandes.get(celda)
                     self.screen.blit(sprite_grande, (x * self.cell_size, y * self.cell_size))
 
-    def dibujar_panel_lateral(self, clima, jugador, jugador_ia, pedidos_disponible, pedidos_inventario_trabajador, pedidos_inventario_ia, incluido, velocidad, meta=None):
+    def dibujar_panel_lateral(self, dificultad, clima, jugador, jugador_ia, pedidos_disponible, pedidos_inventario_trabajador, pedidos_inventario_ia, incluido, velocidad, meta=None):
         x_panel = self.mapa.width * self.cell_size
         y_panel = 0
         alto_total = self.mapa.height * self.cell_size
@@ -70,7 +70,7 @@ class Visualizador:
         margen = 10
 
         # Clima
-        texto_clima = f"Clima: {clima.estado}"
+        texto_clima = f"Clima: {clima.estado} / Dificultad: {dificultad}"
         self.screen.blit(font_titulo.render(texto_clima, True, color_titulo), (x_panel + margen, y_actual))
         y_actual += 26
 
