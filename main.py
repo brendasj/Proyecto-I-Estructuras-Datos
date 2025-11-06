@@ -177,7 +177,7 @@ def main():
         total_pedidos = pedidos.cantidad_pedidos()
         pedidos_tratados = 0
         movimientos = []
-        velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
+        velocidad_actual_trabajador = trabajador.obtener_velocidad(clima, mapa)
         running = True
         while running:
 
@@ -318,8 +318,8 @@ def main():
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
                         movio_este_ciclo = True  # ← NUEVO
                         if dificultad == "facil":
-                            trabajador_ia.nivel_facil_ia(clima, dt, mapa)
-                        trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
+                            trabajador_ia.nivel_facil_ia(clima, dt, mapa, pedidos)
+                        trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual_trabajador, mapa)
                         agregar_pasos(movimientos,pedidos.pedidos, pedidos.pedidos_aceptados, trabajador.entregados, trabajador, bono, penalizaciones)
 
             if not movio_este_ciclo:  # ← NUEVO
@@ -355,7 +355,8 @@ def main():
                 inventario_trabajador,
                 trabajador_ia.inventario.visualizar_por_prioridad(),
                 incluido = incluido,
-                velocidad = velocidad_actual,
+                velocidad_trabajador = velocidad_actual_trabajador,
+                velocidad_ia = velocidad_actual_trabajador_ia,
                 meta = trabajador.estado.meta
             )
 
@@ -370,6 +371,12 @@ def main():
                     visualizador.resaltar_celda(pedido.pickup[0], pedido.pickup[1], (255, 185, 50, 100), "↑")
                 elif not pedido.entregado:
                     visualizador.resaltar_celda(pedido.dropoff[0], pedido.dropoff[1], (255, 255, 0, 100), "↓")
+            
+            for pedido in trabajador_ia.inventario.todos_los_pedidos():
+                if not pedido.recogido:
+                    visualizador.resaltar_celda(pedido.pickup[0], pedido.pickup[1], (50, 100, 255, 100), "↑")
+                elif not pedido.entregado:
+                    visualizador.resaltar_celda(pedido.dropoff[0], pedido.dropoff[1], (100, 150, 255, 100), "↓")
 
             pygame.display.flip()
 

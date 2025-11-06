@@ -53,7 +53,7 @@ class Visualizador:
                     sprite_grande = self.sprites_grandes.get(celda)
                     self.screen.blit(sprite_grande, (x * self.cell_size, y * self.cell_size))
 
-    def dibujar_panel_lateral(self, dificultad, clima, jugador, jugador_ia, pedidos_disponible, pedidos_inventario_trabajador, pedidos_inventario_ia, incluido, velocidad, meta=None):
+    def dibujar_panel_lateral(self, dificultad, clima, jugador, jugador_ia, pedidos_disponible, pedidos_inventario_trabajador, pedidos_inventario_ia, incluido, velocidad_trabajador, velocidad_ia, meta=None):
         x_panel = self.mapa.width * self.cell_size
         y_panel = 0
         alto_total = self.mapa.height * self.cell_size
@@ -83,7 +83,7 @@ class Visualizador:
             pedidos_inventario=pedidos_inventario_trabajador,
             incluido=incluido,
             meta=meta,
-            velocidad=velocidad
+            velocidad=velocidad_trabajador
         )
 
         pygame.draw.line(self.screen, (120, 120, 120), (x_panel + margen, y_actual + 5), (x_panel + 250, y_actual + 5), 2)
@@ -98,7 +98,7 @@ class Visualizador:
         pedidos_inventario=pedidos_inventario_ia,
         incluido=incluido,
         meta=meta,
-        velocidad=velocidad
+        velocidad=velocidad_ia
         )
 
     def panel_jugador(self, titulo, x_panel, y_inicio, jugador, pedidos_disponible, pedidos_inventario, incluido, meta, velocidad):
