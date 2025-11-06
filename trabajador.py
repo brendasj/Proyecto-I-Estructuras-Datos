@@ -3,6 +3,8 @@ import os
 from inventario import Inventario
 from estado_trabajador import EstadoTrabajador
 import copy
+import random
+
 class Trabajador:
     contador = False
 
@@ -128,3 +130,26 @@ class Trabajador:
 
         if not self.movio:
             self.estado.recuperar_resistencia(dt)
+    
+    def nivel_facil_ia(self, clima, dt, mapa):
+        direcciones = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
+        random.shuffle(direcciones)
+
+        for tecla in direcciones:
+            prueba_rect = self.trabajadorRect.copy()
+            dx, dy = 0, 0
+
+            if tecla == pygame.K_UP:
+                dy = -1
+            elif tecla == pygame.K_DOWN:
+                dy = 1
+            elif tecla == pygame.K_LEFT:
+                dx = -1
+            elif tecla == pygame.K_RIGHT:
+                dx = 1
+
+            prueba_rect.move_ip(dx * self.cell_size, dy * self.cell_size)
+
+            if self.es_transitable(prueba_rect, mapa):
+                self.mover_una_celda(tecla, clima, dt, self.obtener_velocidad(clima, mapa), mapa)
+                break
