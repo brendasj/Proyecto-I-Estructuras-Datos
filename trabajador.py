@@ -131,7 +131,18 @@ class Trabajador:
         if not self.movio:
             self.estado.recuperar_resistencia(dt)
     
-    def nivel_facil_ia(self, clima, dt, mapa):
+    def nivel_facil_ia(self, clima, dt, mapa, pedidos):
+        """
+        Nivel fácil (Random Walk + Random Choice):
+        - Escoge pedidos aleatoriamente.
+        - Se mueve aleatoriamente por calles transitables.
+        """
+
+        if pedidos.pedidos and random.random() < 0.09:
+            pedido_aleatorio = random.choice(pedidos.obtener_todos_los_pedidos())
+            if self.inventario.agregar_pedido(pedido_aleatorio):
+                pedidos.aceptar_pedido() 
+
         direcciones = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
         random.shuffle(direcciones)
 
@@ -153,3 +164,6 @@ class Trabajador:
             if self.es_transitable(prueba_rect, mapa):
                 self.mover_una_celda(tecla, clima, dt, self.obtener_velocidad(clima, mapa), mapa)
                 break
+
+        if not self.movio:
+            self.estado.recuperar_resistencia(dt)
