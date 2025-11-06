@@ -6,7 +6,7 @@ import copy
 class Trabajador:
     contador = False
 
-    def __init__(self, mapa_width, mapa_height, cell_size, peso_maximo=5, velocidad_estandar=3):
+    def __init__(self, mapa_width, mapa_height, cell_size, peso_maximo=5, velocidad_estandar=3, ruta_imagen="assets/trabajador.png"):
         self.mapa_width = mapa_width
         self.mapa_height = mapa_height
         self.cell_size = cell_size
@@ -18,8 +18,8 @@ class Trabajador:
 
         self.velocidad_estandar = velocidad_estandar
 
-        self.trabajador_original = pygame.image.load(os.path.join("assets", "trabajador.png"))
-        self.trabajador = pygame.transform.scale(self.trabajador_original, (30, 30))
+        self.trabajador_original = pygame.image.load(ruta_imagen)
+        self.trabajador = pygame.transform.scale(self.trabajador_original, (40, 40))
         self.trabajadorRect = self.trabajador.get_rect()
         self.trabajadorRect.center = (mapa_width // 2 * cell_size, mapa_height // 2 * cell_size)
 

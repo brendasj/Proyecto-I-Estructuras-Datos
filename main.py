@@ -104,6 +104,8 @@ def main():
         mapa = Mapa(datos)
         visualizador = Visualizador(mapa, cell_size)
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
+        trabajador_ia = Trabajador(mapa.width, mapa.height, cell_size, ruta_imagen="assets/trabajador_ia.png")
+        trabajador_ia.trabajadorRect.center = (trabajador.trabajadorRect.centerx + 50, trabajador.trabajadorRect.centery)
         clima = ClimaMarkov("TigerCity")
 
         pedidos = Pedidos(client)
@@ -117,7 +119,7 @@ def main():
         tiempo_juego = 0
         incluido = True
 
-        inventario = trabajador.inventario.visualizar_por_prioridad()
+        inventario_trabajador = trabajador.inventario.visualizar_por_prioridad()
         inventario_modo = 'P'
 
         penalizaciones = 0
@@ -162,9 +164,9 @@ def main():
                                 pedidos_tratados += 1
                                 incluido = True
                                 if inventario_modo == 'O':
-                                    inventario = trabajador.inventario.visualizar_por_entrega()
+                                    inventario_trabajador = trabajador.inventario.visualizar_por_entrega()
                                 else:
-                                    inventario = trabajador.inventario.visualizar_por_prioridad() 
+                                    inventario_trabajador = trabajador.inventario.visualizar_por_prioridad() 
                             else:
                                 incluido = False
                         agregar_pasos(movimientos,pedidos.pedidos, pedidos.pedidos_aceptados, trabajador.entregados, trabajador, bono, penalizaciones)
@@ -253,9 +255,9 @@ def main():
                             trabajador.restaurar_estado(nuevo_trabajador, nuevo_entregado)
                             
                             if inventario_modo == 'O':
-                                inventario = trabajador.inventario.visualizar_por_entrega()
+                                inventario_trabajador = trabajador.inventario.visualizar_por_entrega()
                             else:
-                                inventario = trabajador.inventario.visualizar_por_prioridad()
+                                inventario_trabajador = trabajador.inventario.visualizar_por_prioridad()
                             
                             pedidos_tratados -= 1 
                         else:
@@ -272,7 +274,8 @@ def main():
                 clima.actualizar()
                 trabajador.estado.recuperar_resistencia(dt)
 
-            velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
+            velocidad_actual_trabajador = trabajador.obtener_velocidad(clima, mapa)
+            velocidad_actual_trabajador_ia = trabajador_ia.obtener_velocidad(clima, mapa)
             
             for pedido in trabajador.inventario.todos_los_pedidos():
                 pedido.verificar_interaccion(
@@ -287,26 +290,26 @@ def main():
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
+            trabajador_ia.dibujar(visualizador.screen)
+
 
             # Mostrar panel lateral
             visualizador.dibujar_panel_lateral(
                 clima,
+                trabajador,
+                trabajador_ia,
                 pedidos.obtener_todos_los_pedidos(),
-                inventario,
-                peso = trabajador.inventario.peso_actual,
+                inventario_trabajador,
+                trabajador_ia.inventario.visualizar_por_prioridad(),
                 incluido = incluido,
                 velocidad = velocidad_actual,
-                resistencia = int(trabajador.estado.resistencia),
-                reputacion = int(trabajador.estado.reputacion),
-                entregados = trabajador.inventario.entregados,
-                ingresos = trabajador.estado.ingresos,
                 meta = trabajador.estado.meta
             )
 
             if inventario_modo == 'O':
-                inventario = trabajador.inventario.visualizar_por_entrega()
+                inventario_trabajador = trabajador.inventario.visualizar_por_entrega()
             else:
-                inventario = trabajador.inventario.visualizar_por_prioridad()
+                inventario_trabajador = trabajador.inventario.visualizar_por_prioridad()
 
             # Resaltar pickups y dropoffs
             for pedido in trabajador.inventario.todos_los_pedidos():
