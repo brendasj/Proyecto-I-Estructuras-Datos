@@ -86,7 +86,57 @@ def mostrar_estado_final(resultado):
     time.sleep(0.5)
     root.destroy()
 
+def definir_dificultad():
+    def set_dificultad(valor):
+        nonlocal seleccion
+        seleccion = valor
+        ventana.destroy()
+    
+    ventana = tk.Tk()
+    ventana.title("Seleccionar dificultad")
+    ventana.geometry("300x220")
+    ventana.configure(bg="#f0f0f0")
+
+    tk.Label(
+        ventana,
+        text="Elige la dificultad:",
+        font=("Arial", 14, "bold"),
+        bg="#f0f0f0"
+    ).pack(pady=15)
+
+    seleccion = None
+
+    btn_facil = tk.Button(
+        ventana, text="Fácil", font=("Arial", 12),
+        width=12, bg="#b3ffb3",
+        command=lambda: set_dificultad("facil")
+    )
+    btn_facil.pack(pady=5)
+
+    btn_medio = tk.Button(
+        ventana, text="Medio", font=("Arial", 12),
+        width=12, bg="#ffff99",
+        command=lambda: set_dificultad("medio")
+    )
+    btn_medio.pack(pady=5)
+
+    btn_dificil = tk.Button(
+        ventana, text="Difícil", font=("Arial", 12),
+        width=12, bg="#ff9999",
+        command=lambda: set_dificultad("dificil")
+    )
+    btn_dificil.pack(pady=5)
+
+    ventana.mainloop()
+    return seleccion
+
 def main():
+    dificultad = definir_dificultad()
+
+    if not dificultad:
+        print("No se seleccionó dificultad. Saliendo")
+        return
+    
     pygame.init()
     
     params = {
@@ -107,6 +157,8 @@ def main():
         mapa = Mapa(datos)
         visualizador = Visualizador(mapa, cell_size)
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
+        trabajador_ia = Trabajador(mapa.width, mapa.height, cell_size, ruta_imagen="assets/trabajador_ia.png")
+        trabajador_ia.trabajadorRect.center = (trabajador.trabajadorRect.centerx + 50, trabajador.trabajadorRect.centery)
         clima = ClimaMarkov("TigerCity")
 
         pedidos = Pedidos(client)
@@ -120,7 +172,7 @@ def main():
         tiempo_juego = 0
         incluido = True
 
-        inventario = trabajador.inventario.visualizar_por_prioridad()
+        inventario_trabajador = trabajador.inventario.visualizar_por_prioridad()
         inventario_modo = 'P'
 
         penalizaciones = 0
@@ -165,9 +217,9 @@ def main():
                                 pedidos_tratados += 1
                                 incluido = True
                                 if inventario_modo == 'O':
-                                    inventario = trabajador.inventario.visualizar_por_entrega()
+                                    inventario_trabajador = trabajador.inventario.visualizar_por_entrega()
                                 else:
-                                    inventario = trabajador.inventario.visualizar_por_prioridad() 
+                                    inventario_trabajador = trabajador.inventario.visualizar_por_prioridad() 
                             else:
                                 incluido = False
                         agregar_pasos(movimientos,pedidos.pedidos, pedidos.pedidos_aceptados, trabajador.entregados, trabajador, bono, penalizaciones)
@@ -256,9 +308,9 @@ def main():
                             trabajador.restaurar_estado(nuevo_trabajador, nuevo_entregado)
                             
                             if inventario_modo == 'O':
-                                inventario = trabajador.inventario.visualizar_por_entrega()
+                                inventario_trabajador = trabajador.inventario.visualizar_por_entrega()
                             else:
-                                inventario = trabajador.inventario.visualizar_por_prioridad()
+                                inventario_trabajador = trabajador.inventario.visualizar_por_prioridad()
                             
                             pedidos_tratados -= 1 
                         else:
@@ -268,6 +320,8 @@ def main():
 
                     elif event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
                         movio_este_ciclo = True  # ← NUEVO
+                        if dificultad == "facil":
+                            trabajador_ia.nivel_facil_ia(clima, dt, mapa)
                         trabajador.mover_una_celda(event.key, clima, dt, velocidad_actual, mapa)
                         agregar_pasos(movimientos,pedidos.pedidos, pedidos.pedidos_aceptados, trabajador.entregados, trabajador, bono, penalizaciones)
 
@@ -275,7 +329,8 @@ def main():
                 clima.actualizar()
                 trabajador.estado.recuperar_resistencia(dt)
 
-            velocidad_actual = trabajador.obtener_velocidad(clima, mapa)
+            velocidad_actual_trabajador = trabajador.obtener_velocidad(clima, mapa)
+            velocidad_actual_trabajador_ia = trabajador_ia.obtener_velocidad(clima, mapa)
             
             for pedido in trabajador.inventario.todos_los_pedidos():
                 pedido.verificar_interaccion(
@@ -290,26 +345,27 @@ def main():
             visualizador.screen.fill((255, 255, 255))
             visualizador.dibujar()
             trabajador.dibujar(visualizador.screen)
+            trabajador_ia.dibujar(visualizador.screen)
+
 
             # Mostrar panel lateral
             visualizador.dibujar_panel_lateral(
+                dificultad,
                 clima,
+                trabajador,
+                trabajador_ia,
                 pedidos.obtener_todos_los_pedidos(),
-                inventario,
-                peso = trabajador.inventario.peso_actual,
+                inventario_trabajador,
+                trabajador_ia.inventario.visualizar_por_prioridad(),
                 incluido = incluido,
                 velocidad = velocidad_actual,
-                resistencia = int(trabajador.estado.resistencia),
-                reputacion = int(trabajador.estado.reputacion),
-                entregados = trabajador.inventario.entregados,
-                ingresos = trabajador.estado.ingresos,
                 meta = trabajador.estado.meta
             )
 
             if inventario_modo == 'O':
-                inventario = trabajador.inventario.visualizar_por_entrega()
+                inventario_trabajador = trabajador.inventario.visualizar_por_entrega()
             else:
-                inventario = trabajador.inventario.visualizar_por_prioridad()
+                inventario_trabajador = trabajador.inventario.visualizar_por_prioridad()
 
             # Resaltar pickups y dropoffs
             for pedido in trabajador.inventario.todos_los_pedidos():

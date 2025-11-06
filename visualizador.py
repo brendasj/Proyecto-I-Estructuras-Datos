@@ -53,7 +53,7 @@ class Visualizador:
                     sprite_grande = self.sprites_grandes.get(celda)
                     self.screen.blit(sprite_grande, (x * self.cell_size, y * self.cell_size))
 
-    def dibujar_panel_lateral(self, clima, pedidos_disponible, pedidos_inventario, peso, incluido, velocidad, resistencia=None, reputacion=None, entregados=None, ingresos=None, meta=None):
+    def dibujar_panel_lateral(self, dificultad, clima, jugador, jugador_ia, pedidos_disponible, pedidos_inventario_trabajador, pedidos_inventario_ia, incluido, velocidad, meta=None):
         x_panel = self.mapa.width * self.cell_size
         y_panel = 0
         alto_total = self.mapa.height * self.cell_size
@@ -63,25 +63,62 @@ class Visualizador:
         pygame.draw.rect(self.screen, color_fondo, (x_panel, y_panel, self.panel_lateral, alto_total))
 
         # Fuentes y colores
-        font_titulo = pygame.font.SysFont("Arial", 20, bold=True)
-        font_contenido = pygame.font.SysFont("Arial", 16)
-        font_guia = pygame.font.SysFont("Arial", 16, bold=True)
-        color_texto = (30, 30, 30)
+        font_titulo = pygame.font.SysFont("Arial", 18, bold=True)
         color_titulo = (0, 0, 80)
 
         y_actual = 20
         margen = 10
 
         # Clima
-        texto_clima = f"Clima: {clima.estado}"
+        texto_clima = f"Clima: {clima.estado} / Dificultad: {dificultad}"
         self.screen.blit(font_titulo.render(texto_clima, True, color_titulo), (x_panel + margen, y_actual))
-        y_actual += 30
+        y_actual += 26
+
+        y_actual = self.panel_jugador(
+            titulo="Jugador 1",
+            x_panel=x_panel,
+            y_inicio=y_actual,
+            jugador=jugador,
+            pedidos_disponible=pedidos_disponible,
+            pedidos_inventario=pedidos_inventario_trabajador,
+            incluido=incluido,
+            meta=meta,
+            velocidad=velocidad
+        )
+
+        pygame.draw.line(self.screen, (120, 120, 120), (x_panel + margen, y_actual + 5), (x_panel + 250, y_actual + 5), 2)
+        y_actual += 15
+
+        self.panel_jugador(
+        titulo="Jugador IA",
+        x_panel=x_panel,
+        y_inicio=y_actual + 10,
+        jugador=jugador_ia,  
+        pedidos_disponible=pedidos_disponible,
+        pedidos_inventario=pedidos_inventario_ia,
+        incluido=incluido,
+        meta=meta,
+        velocidad=velocidad
+        )
+
+    def panel_jugador(self, titulo, x_panel, y_inicio, jugador, pedidos_disponible, pedidos_inventario, incluido, meta, velocidad):
+        font_titulo = pygame.font.SysFont("Arial", 16, bold=True)
+        font_contenido = pygame.font.SysFont("Arial", 14)
+        color_titulo = (0, 0, 80)
+        color_texto = (30, 30, 30)
+        margen = 10
+        y_actual = y_inicio
+
+        # Título
+        self.screen.blit(font_titulo.render(titulo, True, color_titulo), (x_panel + margen, y_actual))
+        y_actual += 22
 
         # Resistencia
+        resistencia = jugador.estado.resistencia
         if resistencia is not None:
             texto_res = f"Resistencia: {resistencia:.2f}/100."
             self.screen.blit(font_contenido.render(texto_res, True, color_texto), (x_panel + margen, y_actual))
-            y_actual += 24
+            y_actual += 20
 
             # Barra visual
             barra_ancho = 200
@@ -104,10 +141,11 @@ class Visualizador:
             y_actual += barra_alto + 10
 
         # Reputación
+        reputacion = jugador.estado.reputacion
         if reputacion is not None:
             texto_rep = f"Reputación: {reputacion}/100"
             self.screen.blit(font_contenido.render(texto_rep, True, color_texto), (x_panel + margen, y_actual))
-            y_actual += 24
+            y_actual += 17
 
             # Barra visual de reputación
             barra_ancho = 200
@@ -132,51 +170,54 @@ class Visualizador:
 
         # Solicitudes de pedidos
         self.screen.blit(font_titulo.render("Solicitudes de pedidos:", True, color_titulo), (x_panel + margen, y_actual))
-        y_actual += 28
+        y_actual += 25
         for pedido in pedidos_disponible:
             texto = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority}"
             self.screen.blit(font_contenido.render(texto, True, color_texto), (x_panel + margen, y_actual))
-            y_actual += 22
+            y_actual += 16
 
         # Pedidos para entregar
         self.screen.blit(font_titulo.render("Pedidos para entregar:", True, color_titulo), (x_panel + margen, y_actual))
-        y_actual += 28
+        y_actual += 20
         for pedido in pedidos_inventario:
             texto1 = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority} ({pedido.pickup}) → ({pedido.dropoff})"
             texto2 = f"Hora de entrega: {pedido.deadline_str}"
             self.screen.blit(font_contenido.render(texto1, True, color_texto), (x_panel + margen, y_actual))
-            y_actual += 22
+            y_actual += 16
             self.screen.blit(font_contenido.render(texto2, True, (80, 80, 80)), (x_panel + margen, y_actual))
-            y_actual += 22
+            y_actual += 16
 
         # Pedidos entregados
+        entregados = jugador.inventario.entregados
         if entregados:
             self.screen.blit(font_titulo.render("Pedidos entregados:", True, color_titulo), (x_panel + margen, y_actual))
-            y_actual += 28
+            y_actual += 20
             for pedido in entregados:
                 texto = f"{pedido.id} | ${pedido.payout} | ✓"
                 self.screen.blit(font_contenido.render(texto, True, (100, 100, 100)), (x_panel + margen, y_actual))
-                y_actual += 22
+                y_actual += 16
 
         # Peso
+        peso = jugador.inventario.peso_actual
         texto_peso = f"Peso: {peso}"
         self.screen.blit(font_titulo.render(texto_peso, True, color_titulo), (x_panel + margen, y_actual))
-        y_actual += 28
+        y_actual += 20
         if incluido == False:
             texto = f"Peso máximo alcanzado"
             self.screen.blit(font_contenido.render(texto, True, (0, 0, 255)), (x_panel + margen, y_actual))
-            y_actual += 22
+            y_actual += 15
 
         # Velocidad
         texto_vel = f"Velocidad: {velocidad:.2f}"
         self.screen.blit(font_titulo.render(texto_vel, True, color_titulo), (x_panel + margen, y_actual))
-        y_actual += 28
+        y_actual += 20
 
         # Progreso de ingresos
+        ingresos = jugador.estado.ingresos
         if ingresos is not None and meta is not None:
             texto_ingresos = f"Ingresos: ${ingresos:.2f} / ${meta}"
             self.screen.blit(font_contenido.render(texto_ingresos, True, color_texto), (x_panel + margen, y_actual))
-            y_actual += 24
+            y_actual += 18
 
             # Barra visual
             barra_ancho = 200
@@ -192,6 +233,8 @@ class Visualizador:
             pygame.draw.rect(self.screen, (180, 180, 180), (x_barra, y_barra, barra_ancho, barra_alto))
             pygame.draw.rect(self.screen, color_barra, (x_barra, y_barra, ancho_lleno, barra_alto))
             y_actual += barra_alto + 10
+        
+        return y_actual
 
     def resaltar_celda(self, x, y, color, texto=None):
         font_numero = pygame.font.SysFont("Arial", 12, bold=True)
