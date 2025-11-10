@@ -85,6 +85,8 @@ class Visualizador:
         velocidad_trabajador: float,
         velocidad_ia: float,
         meta: Any = None,
+        tiempo_juego: float = 0.0,
+        time_limit: float | None = None,
     ) -> None:
         """Dibuja el panel lateral con información del jugador y pedidos."""
         x_panel = self.mapa.width * self.cell_size
@@ -97,15 +99,29 @@ class Visualizador:
 
         # Fuentes y colores
         font_titulo = pygame.font.SysFont("Arial", 18, bold=True)
+        font_contenido = pygame.font.SysFont("Arial", 14)
         color_titulo = (0, 0, 80)
 
         y_actual = 20
         margen = 10
 
-        # Clima
-        texto_clima = f"Clima: {clima.estado} / Dificultad: {dificultad}"
+        # Clima y temporizador
+        texto_clima = f"Clima: {clima.estado}"
         self.screen.blit(font_titulo.render(texto_clima, True, color_titulo), (x_panel + margen, y_actual))
-        y_actual += 26
+        y_actual += 22
+
+        # Dificultad en la línea siguiente
+        texto_dificultad = f"Dificultad: {dificultad}"
+        self.screen.blit(font_contenido.render(texto_dificultad, True, (0, 0, 120)), (x_panel + margen, y_actual))
+        y_actual += 20
+
+        # Si se pasó un límite de tiempo, mostrar el reloj (mm:ss) en su propia línea
+        if time_limit is not None:
+            restante = max(0, int(time_limit - tiempo_juego))
+            minutos, segundos = divmod(restante, 60)
+            texto_tiempo = f"Tiempo: {minutos:02d}:{segundos:02d}"
+            self.screen.blit(font_contenido.render(texto_tiempo, True, (80, 80, 80)), (x_panel + margen, y_actual))
+            y_actual += 20
 
         y_actual = self.panel_jugador(
             titulo="Jugador 1",

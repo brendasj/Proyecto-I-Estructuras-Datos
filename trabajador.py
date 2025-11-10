@@ -178,8 +178,14 @@ class Trabajador:
 
         if pedidos.pedidos and random.random() < 0.09:
             pedido_aleatorio = random.choice(pedidos.obtener_todos_los_pedidos())
+            # Intentar agregar el pedido elegido por la IA. Si se agrega
+            # correctamente al inventario, eliminar ese mismo pedido de la
+            # cola de pendientes (aceptarlo específicamente). Antes había un
+            # desajuste: se eliminaba el pedido de mayor prioridad en lugar
+            # del elegido.
             if self.inventario.agregar_pedido(pedido_aleatorio):
-                pedidos.aceptar_pedido()
+                # usar el nuevo método para aceptar el pedido específico
+                pedidos.aceptar_pedido_especifico(pedido_aleatorio)
 
         direcciones = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
         random.shuffle(direcciones)
