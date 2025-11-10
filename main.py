@@ -148,7 +148,9 @@ def main():
         "height": 27,
         "types": ["B", "P", "C"],
         "city_name": "TigerCity",
-        "goal": 1100
+        "goal": 1100,
+        # Límite de tiempo de la partida en segundos (ej. 120 = 2 minutos)
+        "time_limit": 120,
     }
     cell_size = 24
 
@@ -198,13 +200,35 @@ def main():
                 resultado_final = "derrota"
                 mostrar_estado_final(resultado_final)
 
-            elif not pedidos.pedidos and trabajador.inventario.esta_vacia() and trabajador.estado.ingresos < params["goal"]:
+            # No terminar la partida inmediatamente si ya no quedan pedidos
+            # pendientes en la cola: es posible que el jugador (o la IA)
+            # todavía tenga pedidos en su inventario por entregar. Sólo
+            # declaramos derrota aquí si NO hay pedidos pendientes y ambos
+            # inventarios están vacíos y no se alcanzó la meta.
+            elif (
+                # Sólo terminar por falta de pedidos si no hay publicados
+                # y tampoco quedan trabajos sin publicar en la fuente.
+                not pedidos.pedidos
+                and (not hasattr(pedidos, "fuente_jobs") or not pedidos.fuente_jobs)
+                and trabajador.inventario.esta_vacia()
+                and trabajador_ia.inventario.esta_vacia()
+                and trabajador.estado.ingresos < params["goal"]
+            ):
                 running = False
                 resultado_final = "derrota"
                 mostrar_estado_final(resultado_final)
 
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
+
+            # Chequear límite de tiempo (derrota si no alcanza la meta)
+            if tiempo_juego >= params.get("time_limit", float("inf")):
+                running = False
+                if trabajador.estado.ingresos >= params["goal"]:
+                    resultado_final = "victoria"
+                else:
+                    resultado_final = "derrota"
+                mostrar_estado_final(resultado_final)
 
             movio_este_ciclo = False  # ← NUEVO
 
@@ -214,6 +238,11 @@ def main():
 
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
+                        # Si no hay pedidos publicados, publicar (mostrar)
+                        # el siguiente desde la fuente al pulsar 'a'.
+                        if not pedidos.pedidos:
+                            pedidos.publicar_siguiente_pedido()
+
                         pedido_a_aceptar = pedidos.obtener_siguiente_pedido()
                         if pedido_a_aceptar:
                             if trabajador.inventario.agregar_pedido(pedido_a_aceptar):
@@ -365,6 +394,9 @@ def main():
                 velocidad_trabajador = velocidad_actual_trabajador,
                 velocidad_ia = velocidad_actual_trabajador_ia,
                 meta = trabajador.estado.meta
+                ,
+                tiempo_juego = tiempo_juego,
+                time_limit = params.get("time_limit")
             )
 
             if inventario_modo == 'O':

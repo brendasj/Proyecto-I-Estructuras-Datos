@@ -1,7 +1,18 @@
 from datetime import datetime, timezone
 
+
 class Pedido:
-    def __init__(self, id, payout, priority, pickup, dropoff, weight, deadline, release_time):
+    def __init__(
+        self,
+        id,
+        payout,
+        priority,
+        pickup,
+        dropoff,
+        weight,
+        deadline,
+        release_time,
+    ):
         self.id = id
         self.payout = payout
         self.priority = priority
@@ -9,34 +20,49 @@ class Pedido:
         self.dropoff = dropoff
         self.weight = weight
 
+        # Normalizaremos el deadline como segundos restantes desde el inicio
+        # del juego (tiempo 0). Para ello calculamos el tiempo restante en
+        # segundos respecto al momento actual (UTC). Si la API ya entrega
+        # un número de segundos lo consideramos como tiempo restante.
         try:
-            if isinstance(deadline, str) and isinstance(release_time, (int, float)):
-                deadline = deadline.strip().replace("Z", "+00:00")
-                deadline_dt = datetime.fromisoformat(deadline)
-                release_dt = datetime.fromtimestamp(release_time, tz=timezone.utc)
-                self.deadline = (deadline_dt - release_dt).total_seconds()
-                self.release_time = float(release_time)
+            now_utc = datetime.now(timezone.utc)
 
-            elif isinstance(deadline, (int, float)) and isinstance(release_time, (int, float)):
-                self.deadline = float(deadline)
-                self.release_time = float(release_time)
+            if isinstance(deadline, str):
+                # ISO string: convertir a datetime aware y calcular resto
+                raw = deadline.strip().replace("Z", "+00:00")
+                deadline_dt = datetime.fromisoformat(raw)
+                remaining = (deadline_dt - now_utc).total_seconds()
+                self.release_time = (
+                    float(release_time)
+                    if isinstance(release_time, (int, float))
+                    else 0.0
+                )
 
-            elif isinstance(deadline, str) and isinstance(release_time, str):
-                deadline = deadline.strip().replace("Z", "+00:00")
-                release_time = release_time.strip().replace("Z", "+00:00")
-                deadline_dt = datetime.fromisoformat(deadline)
-                release_dt = datetime.fromisoformat(release_time)
-                self.deadline = (deadline_dt - release_dt).total_seconds()
-                self.release_time = 0
+            elif isinstance(deadline, (int, float)):
+                # ya es un número de segundos (tiempo restante)
+                remaining = float(deadline)
+                self.release_time = float(release_time) if isinstance(release_time, (int, float)) else 0.0
 
             else:
-                raise ValueError("Formato de fecha no reconocido")
+                raise ValueError("Formato de deadline no reconocido")
+
+            # Nunca guardar valores negativos: si ya pasó la hora, lo marcamos 0
+            self.deadline = max(0.0, remaining)
 
         except Exception as e:
-            print(f"Error al convertir fechas: {e}")
-            self.deadline = 300
+            print(f"Error al convertir fechas del pedido {id}: {e}")
+            # valor por defecto: 5 minutos
+            self.deadline = 300.0
+            self.release_time = 0.0
 
-        self.deadline_str = deadline[11:16] if isinstance(deadline, str) else "?"
+        # Cadena para mostrar (HH:MM) si se pasó un ISO original
+        try:
+            self.deadline_str = (
+                raw[11:16] if isinstance(deadline, str) and len(raw) >= 16 else "?"
+            )
+        except NameError:
+            self.deadline_str = "?"
+
         self.recogido = False
         self.entregado = False
 
