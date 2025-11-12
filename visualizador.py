@@ -122,6 +122,20 @@ class Visualizador:
         self.screen.blit(font_contenido.render(texto_dificultad, True, (0, 0, 120)), (x_panel + margen, y_actual))
         y_actual += 20
 
+        # Solicitudes de pedidos (general para ambos jugadores)
+        self.screen.blit(font_titulo.render("Solicitudes de pedidos:", True, color_titulo), (x_panel + margen, y_actual))
+        y_actual += 25
+        for pedido in pedidos_disponible:
+            texto = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority}"
+            self.screen.blit(font_contenido.render(texto, True, (30, 30, 30)), (x_panel + margen, y_actual))
+            y_actual += 16
+
+        # Separador
+        pygame.draw.line(
+            self.screen, (120, 120, 120), (x_panel + margen, y_actual + 5), (x_panel + 250, y_actual + 5), 2
+        )
+        y_actual += 15
+
         y_actual = self.panel_jugador(
             titulo="Jugador 1",
             x_panel=x_panel,
@@ -232,14 +246,6 @@ class Visualizador:
             pygame.draw.rect(self.screen, (180, 180, 180), (x_barra, y_barra, barra_ancho, barra_alto))
             pygame.draw.rect(self.screen, color_barra, (x_barra, y_barra, ancho_lleno, barra_alto))
             y_actual += barra_alto + 10
-
-        # Solicitudes de pedidos
-        self.screen.blit(font_titulo.render("Solicitudes de pedidos:", True, color_titulo), (x_panel + margen, y_actual))
-        y_actual += 25
-        for pedido in pedidos_disponible:
-            texto = f"{pedido.id} | ${pedido.payout} | P:{pedido.priority}"
-            self.screen.blit(font_contenido.render(texto, True, color_texto), (x_panel + margen, y_actual))
-            y_actual += 16
 
         # Pedidos para entregar
         self.screen.blit(font_titulo.render("Pedidos para entregar:", True, color_titulo), (x_panel + margen, y_actual))
