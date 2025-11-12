@@ -170,8 +170,7 @@ def main():
         pedidos = Pedidos(client)
         pedidos.procesar_pedidos()
 
-        for _ in range(5):  
-            pedidos.publicar_siguiente_pedido()
+        # No publicar pedidos al inicio - el jugador los publica con la tecla 'A'
 
         historial = Puntajes()
 
@@ -241,23 +240,8 @@ def main():
 
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
-                        # Si no hay pedidos publicados, publicar (mostrar)
-                        # el siguiente desde la fuente al pulsar 'a'.
-                        if not pedidos.pedidos:
-                            pedidos.publicar_siguiente_pedido()
-
-                        pedido_a_aceptar = pedidos.obtener_siguiente_pedido()
-                        if pedido_a_aceptar:
-                            if trabajador.inventario.agregar_pedido(pedido_a_aceptar):
-                                pedidos.aceptar_pedido()
-                                pedidos_tratados += 1
-                                incluido = True
-                                if inventario_modo == 'O':
-                                    inventario_trabajador = trabajador.inventario.visualizar_por_entrega()
-                                else:
-                                    inventario_trabajador = trabajador.inventario.visualizar_por_prioridad() 
-                            else:
-                                incluido = False
+                        # Solo publicar un pedido en el mapa
+                        pedidos.publicar_siguiente_pedido()
                         agregar_pasos(movimientos,pedidos.pedidos, pedidos.pedidos_aceptados, trabajador.entregados, trabajador, bono, penalizaciones)
 
                     elif event.key == pygame.K_r:
@@ -370,6 +354,39 @@ def main():
             velocidad_actual_trabajador = trabajador.obtener_velocidad(clima, mapa)
             velocidad_actual_trabajador_ia = trabajador_ia.obtener_velocidad(clima, mapa)
             
+            # Aceptar automáticamente pedidos publicados cuando el jugador
+            # pasa por su pickup (recogerlos al vuelo).
+            # Recorremos una copia de la lista heap para evitar modificarla mientras iteramos.
+            for tup in pedidos.pedidos[:]:
+                try:
+                    _, _, pedido_pub = tup
+                except Exception:
+                    continue
+
+                # Si el jugador está lo suficientemente cerca del pickup y
+                # hay capacidad en el inventario, aceptar y agregar el pedido.
+                if pedido_pub.esta_cerca(trabajador.trabajadorRect, pedido_pub.pickup, cell_size):
+                    # Comprobar capacidad de peso antes de aceptar
+                    if trabajador.inventario.peso_actual + pedido_pub.weight <= trabajador.inventario.peso_maximo:
+                        pedido_aceptado = pedidos.aceptar_pedido_especifico(pedido_pub)
+                        if pedido_aceptado:
+                            agregado = trabajador.inventario.agregar_pedido(pedido_aceptado)
+                            if agregado:
+                                # Verificar interacción ahora que está en el inventario
+                                pedido_aceptado.verificar_interaccion(
+                                    trabajador.trabajadorRect,
+                                    cell_size,
+                                    trabajador.inventario,
+                                    trabajador.estado,
+                                    tiempo_juego
+                                )
+                                pedidos_tratados += 1
+                            else:
+                                # Si por alguna razón no se pudo agregar, volver a insertar
+                                import heapq
+                                index = len(pedidos.pedidos) + 1
+                                heapq.heappush(pedidos.pedidos, (-pedido_aceptado.priority, index, pedido_aceptado))
+
             for pedido in trabajador.inventario.todos_los_pedidos():
                 pedido.verificar_interaccion(
                     trabajador.trabajadorRect,
@@ -409,6 +426,11 @@ def main():
             else:
                 inventario_trabajador = trabajador.inventario.visualizar_por_prioridad()
 
+            # Resaltar pedidos disponibles (no asignados)
+            for pedido_tuple in pedidos.pedidos:
+                _, _, pedido = pedido_tuple
+                visualizador.resaltar_celda(pedido.pickup[0], pedido.pickup[1], (50, 255, 50, 120), "↑")
+            
             # Resaltar pickups y dropoffs
             for pedido in trabajador.inventario.todos_los_pedidos():
                 if not pedido.recogido:
