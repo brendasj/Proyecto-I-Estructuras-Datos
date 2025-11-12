@@ -164,7 +164,12 @@ def main():
         visualizador = Visualizador(mapa, cell_size)
         trabajador = Trabajador(mapa.width, mapa.height, cell_size)
         trabajador_ia = Trabajador(mapa.width, mapa.height, cell_size, ruta_imagen="assets/trabajador_ia.png")
-        trabajador_ia.trabajadorRect.center = (trabajador.trabajadorRect.centerx + 50, trabajador.trabajadorRect.centery)
+        # Alinear la IA a la cuadrícula (usar múltiplos de cell_size). Antes se usaban 50px
+        # que no es múltiplo de cell_size y producía desalineación.
+        trabajador_ia.trabajadorRect.center = (
+            trabajador.trabajadorRect.centerx + cell_size * 2,
+            trabajador.trabajadorRect.centery,
+        )
         clima = ClimaMarkov("TigerCity")
 
         pedidos = Pedidos(client)
@@ -350,6 +355,15 @@ def main():
                 trabajador.estado.recuperar_resistencia(dt)
                 if dificultad == "facil":
                     trabajador_ia.estado.recuperar_resistencia(dt)
+
+            # En modo difícil la IA debe decidir y moverse cada ciclo
+            if dificultad == "dificil":
+                # llamar siempre al comportamiento difícil (moverá un paso si puede)
+                try:
+                    trabajador_ia.nivel_dificil_ia(clima, dt, mapa, pedidos)
+                except Exception:
+                    # no bloquear la partida por un fallo en la IA
+                    pass
 
             velocidad_actual_trabajador = trabajador.obtener_velocidad(clima, mapa)
             velocidad_actual_trabajador_ia = trabajador_ia.obtener_velocidad(clima, mapa)
