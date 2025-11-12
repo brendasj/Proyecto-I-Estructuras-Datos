@@ -175,6 +175,8 @@ class Trabajador:
         Este método intenta moverse en una dirección transitables y, con pequeña
         probabilidad, acepta pedidos aleatorios.
         """
+        if not pedidos.pedidos and pedidos.fuente_jobs:
+            pedidos.publicar_siguiente_pedido()
 
         if pedidos.pedidos and random.random() < 0.09:
             pedido_aleatorio = random.choice(pedidos.obtener_todos_los_pedidos())
@@ -208,6 +210,3 @@ class Trabajador:
             if self.es_transitable(prueba_rect, mapa):
                 self.mover_una_celda(tecla, clima, dt, self.obtener_velocidad(clima, mapa), mapa)
                 break
-
-        if not self.movio:
-            self.estado.recuperar_resistencia(dt)

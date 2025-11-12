@@ -170,6 +170,9 @@ def main():
         pedidos = Pedidos(client)
         pedidos.procesar_pedidos()
 
+        for _ in range(5):  
+            pedidos.publicar_siguiente_pedido()
+
         historial = Puntajes()
 
         guardador_binario = Gestor_Binarios()
@@ -211,7 +214,7 @@ def main():
                 not pedidos.pedidos
                 and (not hasattr(pedidos, "fuente_jobs") or not pedidos.fuente_jobs)
                 and trabajador.inventario.esta_vacia()
-                and trabajador_ia.inventario.esta_vacia()
+                # and trabajador_ia.inventario.esta_vacia()
                 and trabajador.estado.ingresos < params["goal"]
             ):
                 running = False
@@ -361,6 +364,8 @@ def main():
             if not movio_este_ciclo:  # ← NUEVO
                 clima.actualizar()
                 trabajador.estado.recuperar_resistencia(dt)
+                if dificultad == "facil":
+                    trabajador_ia.estado.recuperar_resistencia(dt)
 
             velocidad_actual_trabajador = trabajador.obtener_velocidad(clima, mapa)
             velocidad_actual_trabajador_ia = trabajador_ia.obtener_velocidad(clima, mapa)

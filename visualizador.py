@@ -107,21 +107,20 @@ class Visualizador:
 
         # Clima y temporizador
         texto_clima = f"Clima: {clima.estado}"
-        self.screen.blit(font_titulo.render(texto_clima, True, color_titulo), (x_panel + margen, y_actual))
+        
+        # Si se pasó un límite de tiempo, mostrar el reloj (mm:ss) en su propia línea
+        if time_limit is not None:
+            restante = max(0, int(time_limit - tiempo_juego))
+            minutos, segundos = divmod(restante, 60)
+            texto_tiempo = f"Tiempo: {minutos:02d}:{segundos:02d}"
+
+        self.screen.blit(font_titulo.render(texto_clima + "    " + texto_tiempo, True, color_titulo), (x_panel + margen, y_actual))
         y_actual += 22
 
         # Dificultad en la línea siguiente
         texto_dificultad = f"Dificultad: {dificultad}"
         self.screen.blit(font_contenido.render(texto_dificultad, True, (0, 0, 120)), (x_panel + margen, y_actual))
         y_actual += 20
-
-        # Si se pasó un límite de tiempo, mostrar el reloj (mm:ss) en su propia línea
-        if time_limit is not None:
-            restante = max(0, int(time_limit - tiempo_juego))
-            minutos, segundos = divmod(restante, 60)
-            texto_tiempo = f"Tiempo: {minutos:02d}:{segundos:02d}"
-            self.screen.blit(font_contenido.render(texto_tiempo, True, (80, 80, 80)), (x_panel + margen, y_actual))
-            y_actual += 20
 
         y_actual = self.panel_jugador(
             titulo="Jugador 1",
