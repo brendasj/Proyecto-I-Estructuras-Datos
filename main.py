@@ -150,7 +150,7 @@ def main():
         "city_name": "TigerCity",
         "goal": 1100,
         # Límite de tiempo de la partida en segundos (ej. 120 = 2 minutos)
-        "time_limit": 120,
+        "time_limit": 480,
     }
     cell_size = 24
 
@@ -355,6 +355,8 @@ def main():
                 trabajador.estado.recuperar_resistencia(dt)
                 if dificultad == "facil":
                     trabajador_ia.estado.recuperar_resistencia(dt)
+                elif dificultad == "medio":
+                    trabajador_ia.estado.recuperar_resistencia(dt)
 
             # En modo difícil la IA debe decidir y moverse cada ciclo
             if dificultad == "dificil":
@@ -363,6 +365,11 @@ def main():
                     trabajador_ia.nivel_dificil_ia(clima, dt, mapa, pedidos)
                 except Exception:
                     # no bloquear la partida por un fallo en la IA
+                    pass
+            elif dificultad == "medio":
+                try:
+                    trabajador_ia.nivel_medio_ia(clima, dt, mapa, pedidos)
+                except Exception:
                     pass
 
             velocidad_actual_trabajador = trabajador.obtener_velocidad(clima, mapa)
