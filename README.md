@@ -62,11 +62,11 @@ Se pierde la partida si:
 
 ## SEGUNDO PROYECTO (CONTINUACIÓN)
 
-Descripción del Proyecto:
+# Descripción del Proyecto:
 
 Esta segunda fase del proyecto Courier Quest incorpora un jugador controlado por inteligencia artificial (IA), que competirá contra el jugador humano para realizar entregas dentro de una ciudad simulada. El objetivo es diseñar e implementar tres niveles de dificultad para la IA, cada uno utilizando diferentes técnicas de búsqueda, estructuras de datos y estrategias de decisión.
 
-Objetivos de Aprendizaje:
+# Objetivos de Aprendizaje:
 
 - Aplicar estructuras de datos lineales y no lineales como listas, colas, árboles, grafos y colas de prioridad.
 - Implementar algoritmos de búsqueda y decisión adaptados al contexto del juego.
@@ -79,7 +79,7 @@ El sistema debe incluir al menos un jugador controlado por IA que:
 - Tenga su propia barra de resistencia, reputación y capacidad de carga.
 - Pueda ser configurado en tres niveles de dificultad: fácil, medio y difícil.
 
-Niveles de Dificultad de la IA:
+# Niveles de Dificultad de la IA:
 
 En el nivel fácil, la IA toma decisiones aleatorias. Elige un trabajo disponible al azar y se mueve en direcciones aleatorias evitando edificios. Ocasionalmente, vuelve a lanzar el objetivo después de un tiempo límite o al completar una entrega. Este nivel utiliza lógica probabilística simple y estructuras como listas y colas.
 
@@ -89,7 +89,7 @@ Luego selecciona el movimiento con la puntuación más alta. Se puede implementa
 
 En el nivel difícil, la IA busca rutas óptimas entre entregas considerando costos y condiciones climáticas. Se representa la ciudad como un grafo ponderado, donde el peso de cada superficie se usa como costo de arista. Se pueden aplicar algoritmos como Dijkstra, A* o BFS ponderado. Además, se puede integrar replanificación dinámica si el clima empeora o si la resistencia del jugador es baja. También se debe incluir lógica para elegir la secuencia de entregas que minimice los desplazamientos y maximice las ganancias.
 
-Requisitos Técnicos:
+## Requisitos Técnicos:
 
 El código debe estar escrito en Python, cumplir con las normas PEP8 y estar debidamente documentado utilizando docstrings. La documentación debe explicar claramente el funcionamiento de cada módulo y función.
 
