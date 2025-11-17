@@ -356,7 +356,13 @@ class Trabajador:
         return []
     
     def nivel_medio_ia(self, clima, dt, mapa, pedidos):
-        """IA nivel medio: greedy lookahead 2-3 acciones."""
+        """IA nivel medio:
+        - Utiliza greedy lookahead con planificación limitada (DFS con max_depth=7).
+        - Prioriza entregar pedidos ya recogidos.
+        - Luego intenta recoger nuevos pedidos.
+        - Mantiene comportamiento no óptimo pero suficientemente competente.
+        """
+
         # Actualizar cooldown
         if self.cooldown_movimiento > 0:
             self.cooldown_movimiento -= dt
@@ -450,8 +456,8 @@ class Trabajador:
             self.cooldown_movimiento = self.DELAY_MOVIMIENTO
    
 
-    def _calcular_movimientos(self, x0, y0, objetivo, mapa, max_depth=5):
-        """Greedy lookahead de 3 pasos usando DFS limitada."""
+    def _calcular_movimientos(self, x0, y0, objetivo, mapa, max_depth=7):
+        """Greedy lookahead con horizonte de 7 pasos (DFS limitada). """
         moves = [
             (pygame.K_UP,    (0, -1)),
             (pygame.K_DOWN,  (0, 1)),
