@@ -16,7 +16,12 @@ class Visualizador:
     """
 
     def __init__(self, mapa: Any, cell_size: int) -> None:
-        pygame.init()
+        # Configuración específica para evitar conflictos
+        import os
+        if not pygame.get_init():
+            # Solo inicializar si no está ya inicializado
+            os.environ['SDL_VIDEO_WINDOW_POS'] = '100,100'
+            pygame.init()
         self.fondo_calles = pygame.image.load(
             os.path.join("assets", "calle4.png")
         )

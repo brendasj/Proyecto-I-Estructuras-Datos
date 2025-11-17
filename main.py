@@ -26,10 +26,19 @@ from datos_clima import ClimaMarkov
 
 def mostrar_error() -> None:
     """Muestra un cuadro de diálogo indicando que la opción no es válida."""
-    root = tk.Tk()
-    root.withdraw()
-    messagebox.showinfo("Error", "Opción no válida")
-    root.destroy()
+    root = None
+    try:
+        root = tk.Tk()
+        root.withdraw()
+        messagebox.showinfo("Error", "Opción no válida")
+    except Exception as e:
+        print(f"Error mostrando mensaje de error: {e}")
+    finally:
+        if root:
+            try:
+                root.destroy()
+            except:
+                pass
 
 def mostrar_opciones(op):
     titulo = "Partidas disponibles"
@@ -43,10 +52,14 @@ def mostrar_opciones(op):
         impresion += "Opcion " + str(contador) + "\n" + dato1 + dato2 + dato3 + "\n"
         contador += 1
 
-    select = simpledialog.askinteger(titulo,impresion)
-    if select is not None:
-        return select - 1
-    else:
+    try:
+        select = simpledialog.askinteger(titulo, impresion)
+        if select is not None:
+            return select - 1
+        else:
+            return -1
+    except Exception as e:
+        print(f"Error en selección de partida: {e}")
         return -1
 
 def dehacer_pasos(mov):
@@ -76,23 +89,34 @@ def mostrar_estado_final(resultado, razon):
     root = tk.Tk()
     root.withdraw()
 
-    if resultado == "victoria":
-        titulo = "VICTORIA"
-        mensaje = f"¡Felicidades! Has alcanzado la meta, " + razon
+    try:
+        if resultado == "victoria":
+            titulo = "VICTORIA"
+            mensaje = f"¡Felicidades! Has alcanzado la meta, " + razon
+            
+            messagebox.showinfo(titulo, mensaje)
+        elif resultado == "derrota":
+            titulo = "DERROTA"
+            mensaje = f"Perdiste, " + razon
+            messagebox.showinfo(titulo, mensaje)
+        elif resultado == "empate":
+            titulo = "EMPATE"
+            mensaje = f"Empate, " + razon
+            messagebox.showinfo(titulo, mensaje)
         
-        messagebox.showinfo(titulo, mensaje)
-    elif resultado == "derrota":
-        titulo = "DERROTA"
-        mensaje = f"Perdiste, " + razon
-        messagebox.showinfo(titulo, mensaje)
-    elif resultado == "empate":
-        titulo = "EMPATE"
-        mensaje = f"Empate, " + razon
-        messagebox.showinfo(titulo, mensaje)
-    
-    root.update()
-    time.sleep(0.5)
-    root.destroy()
+        # Solo actualizar si la ventana aún existe
+        if root.winfo_exists():
+            root.update()
+        time.sleep(0.1)  # Reducir tiempo de espera
+    except Exception as e:
+        print(f"Error mostrando mensaje: {e}")
+    finally:
+        # Destruir de forma segura
+        try:
+            if root.winfo_exists():
+                root.destroy()
+        except:
+            pass
 
 def definir_dificultad():
     def set_dificultad(valor):
@@ -145,7 +169,15 @@ def main():
         print("No se seleccionó dificultad. Saliendo")
         return
     
-    pygame.init()
+    # Configuración específica para evitar conflictos en macOS
+    try:
+        import os
+        os.environ['SDL_VIDEO_WINDOW_POS'] = '100,100'  # Posición fija para evitar conflictos
+        os.environ['SDL_VIDEO_CENTERED'] = '0'
+        pygame.init()
+    except Exception as e:
+        print(f"Error inicializando pygame: {e}")
+        return
     
     params = {
         "width": 17,
@@ -533,6 +565,14 @@ def main():
         print("No se pudo cargar el mapa. Saliendo del programa.")
 
 if __name__ == "__main__":
-    main()
-    time.sleep(1) 
-    pygame.quit()
+    try:
+        main()
+    except Exception as e:
+        print(f"Error en la ejecución principal: {e}")
+    finally:
+        # Cierre seguro de pygame
+        try:
+            pygame.quit()
+        except:
+            pass
+        time.sleep(0.1)
