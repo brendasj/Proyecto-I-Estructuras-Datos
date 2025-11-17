@@ -1,10 +1,36 @@
 # Courier Quest, Repartidor en TigerCity
-Este proyecto simula la vida de un repartidor en una ciudad. El objetivo principal es alcanzar la meta de ingresos por medio de los pedidos y la recompensas. Debe de recoger y entregar el pedido en diferentes locaciones mientras algunos factores como el peso y el clima influyen su resistencia y reputación. 
+Courier Quest es un simulador donde el jugador controla a un repartidor que debe navegar por una ciudad, recoger pedidos y entregarlos a tiempo, mientras compite contra un **agente de Inteligencia Artificial (IA)**.  
+El objetivo del juego es **superar a la IA** generando más ingresos dentro de un tiempo límite.
 
-# Factores de derrota 
-Se pierde la partida si:
-1. La reputación es menor a 20
-2. Cuando todos los pedidos hayan sido gestionados pero no se ha alcanzado la meta de ingresos indicada. 
+
+# Modo Competitivo Humano vs IA
+
+En esta fase del proyecto, el jugador humano compite directamente contra una IA. Ambos:
+
+- Reciben los mismos pedidos.
+- Tienen resistencia, reputación e inventario independientes.
+- Se mueven por el mismo mapa.
+- Seleccionan, recogen y entregan pedidos bajo las mismas reglas.
+
+El ganador final es **quien acumule más ingresos**.
+
+# Condiciones de Victoria y Derrota
+
+## Victoria
+El jugador humano gana si:
+
+- Al terminar el tiempo tiene **más ingresos que la IA**, o  
+- Ya no quedan pedidos y **su ingreso es mayor al de la IA**.
+
+## Derrota
+El jugador humano pierde si:
+
+- Su **reputación baja de 20** (derrota inmediata).  
+- Finaliza el tiempo y la **IA tiene más ingresos**.  
+- No quedan pedidos y la **IA tiene más ingresos**.
+
+## Empate
+Si ambos tienen exactamente los mismos ingresos al finalizar la partida. 
 
 # Factores del juego
 - **Resistencia:** Disminuye al moverse y se ve más afectada cuando hay peso o un clima díficil. Cuando esta llega a 0 debe de descansar para recuperarse.
@@ -27,6 +53,40 @@ Se pierde la partida si:
 | **L** | **Cargar Partida**   | Carga la partida anterior y se puede seguir jugando.                   |
 | **U** | **Retroceder pasos**   | Permite retroceder los pasos anteriores.                   |
 
+
+# Inteligencia Artificial (IA)
+
+La IA tiene **tres niveles de dificultad**:
+
+## Nivel Fácil
+- Movimiento aleatorio.
+- Selección aleatoria de pedidos.
+- Evita edificios de forma básica.
+
+## Nivel Medio — Greedy Lookahead (DFS Limitada)
+
+La IA evalúa movimientos futuros usando una función heurística basada en:
+
+- distancia Manhattan  
+- clima  
+- recompensas esperadas
+
+### Horizonte de anticipación (max_depth)
+
+Aunque la guía del proyecto sugiere usar 2–3 acciones de anticipación, en el mapa real esto causaba muchos ciclos.  
+Por ello, se ajustó a: `max_depth` = 7
+
+Esto evita bucles, mantiene un comportamiento intermedio y no convierte al agente en un planificador completo.
+
+## Nivel Difícil — Búsqueda Óptima
+
+- Modela la ciudad como un grafo ponderado.
+- Usa algoritmos como:
+  - **Dijkstra**
+  - **A\***
+  - **BFS ponderado**
+- Replanifica cuando cambia el clima o las condiciones.
+- Selecciona rutas y secuencias de entregas óptimas.
 
 # Estructuras de Datos que se utilizaron
 ### 1. Lista Doblemente Enlazada (Inventario)
@@ -60,39 +120,17 @@ Se pierde la partida si:
 | :--- | :--- | :--- | :--- |
 | **`Inventario`** | Visualización ordenada de pedidos para el panel lateral. | Utiliza la función `sorted()` de Python con una función `lambda`. | `visualizar_por_prioridad()` / `visualizar_por_entrega()`: $O(n \log n)$ (debido al uso de `sorted()`). |
 
-## SEGUNDO PROYECTO (CONTINUACIÓN)
+# Finalización del Juego
 
-# Descripción del Proyecto:
+El juego termina por:
 
-Esta segunda fase del proyecto Courier Quest incorpora un jugador controlado por inteligencia artificial (IA), que competirá contra el jugador humano para realizar entregas dentro de una ciudad simulada. El objetivo es diseñar e implementar tres niveles de dificultad para la IA, cada uno utilizando diferentes técnicas de búsqueda, estructuras de datos y estrategias de decisión.
+1. **Derrota inmediata:** reputación < 20  
+2. **Fin del tiempo:** gana quien tenga más ingresos  
+3. **Sin pedidos disponibles:** gana quien tenga más ingresos  
+4. **Empate:** ingresos iguales
 
-# Objetivos de Aprendizaje:
+# Notas Técnicas
 
-- Aplicar estructuras de datos lineales y no lineales como listas, colas, árboles, grafos y colas de prioridad.
-- Implementar algoritmos de búsqueda y decisión adaptados al contexto del juego.
-- Analizar la eficiencia de distintos enfoques de IA.
-- Desarrollar un agente autónomo que se comporte de manera coherente y competitiva.
-Jugabilidad
-El sistema debe incluir al menos un jugador controlado por IA que:
-- Reciba la misma información del mapa, clima y solicitudes de entrega que el jugador humano.
-- Pueda desplazarse por la ciudad, recoger y entregar pedidos siguiendo las reglas del juego.
-- Tenga su propia barra de resistencia, reputación y capacidad de carga.
-- Pueda ser configurado en tres niveles de dificultad: fácil, medio y difícil.
-
-# Niveles de Dificultad de la IA:
-
-En el nivel fácil, la IA toma decisiones aleatorias. Elige un trabajo disponible al azar y se mueve en direcciones aleatorias evitando edificios. Ocasionalmente, vuelve a lanzar el objetivo después de un tiempo límite o al completar una entrega. Este nivel utiliza lógica probabilística simple y estructuras como listas y colas.
-
-En el nivel medio, la IA evalúa movimientos futuros en función de una puntuación heurística. Mantiene un horizonte de anticipación pequeño (2 o 3 acciones por delante) y calcula una puntuación para cada movimiento posible usando una fórmula como:
-score = a * (ganancia esperada) - ß * (costo de distancia) - y * (penalización por clima)
-Luego selecciona el movimiento con la puntuación más alta. Se puede implementar con algoritmos como búsqueda greedy, minimax simplificado o expectimax.
-
-En el nivel difícil, la IA busca rutas óptimas entre entregas considerando costos y condiciones climáticas. Se representa la ciudad como un grafo ponderado, donde el peso de cada superficie se usa como costo de arista. Se pueden aplicar algoritmos como Dijkstra, A* o BFS ponderado. Además, se puede integrar replanificación dinámica si el clima empeora o si la resistencia del jugador es baja. También se debe incluir lógica para elegir la secuencia de entregas que minimice los desplazamientos y maximice las ganancias.
-
-## Requisitos Técnicos:
-
-El código debe estar escrito en Python, cumplir con las normas PEP8 y estar debidamente documentado utilizando docstrings. La documentación debe explicar claramente el funcionamiento de cada módulo y función.
-
-
-
-
+- Escrito en **Python 3**.  
+- Cumple con PEP8.  
+- Documentado con docstrings.  
