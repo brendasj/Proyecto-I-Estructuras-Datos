@@ -61,6 +61,9 @@ class Trabajador:
         self.historial_pos = []
         self.max_historial = 6
 
+        self.contador_bloqueos = 0
+        self.max_bloqueos = 3
+
     def es_transitable(self, rect: pygame.Rect, mapa: Any) -> bool:
         """Comprueba si el rect es transitables (no está dentro de un edificio)."""
         puntos = [
@@ -224,58 +227,106 @@ class Trabajador:
         if not self.movio:
             self.estado.recuperar_resistencia(dt)
 
+
     def nivel_facil_ia(self, clima: Any, dt: float, mapa: Any, pedidos: Any) -> None:
-        """Comportamiento simple de IA: movimiento aleatorio y aceptación ocasional de pedidos.
+        """IA fácil: movimiento simple + recoger/entregar cuando esté cerca."""
 
-        Este método intenta moverse en una dirección transitables y, con pequeña
-        probabilidad, acepta pedidos aleatorios.
-        """
-        # La IA no publica pedidos automáticamente - solo el jugador controla esto
-        # if not pedidos.pedidos and pedidos.fuente_jobs:
-        #     pedidos.publicar_siguiente_pedido()
+        x_actual = int(self.trabajadorRect.centerx / self.cell_size)
+        y_actual = int(self.trabajadorRect.centery / self.cell_size)
 
-        # La IA no acepta pedidos automáticamente - esto evita que los pedidos
-        # desaparezcan de la lista sin que el jugador los acepte
-        # if pedidos.pedidos and random.random() < 0.09:
-        #     pedido_aleatorio = random.choice(pedidos.obtener_todos_los_pedidos())
-        #     # Intentar agregar el pedido elegido por la IA. Si se agrega
-        #     # correctamente al inventario, eliminar ese mismo pedido de la
-        #     # cola de pendientes (aceptarlo específicamente). Antes había un
-        #     # desajuste: se eliminaba el pedido de mayor prioridad en lugar
-        #     # del elegido.
-        #     if self.inventario.agregar_pedido(pedido_aleatorio):
-        #         # usar el nuevo método para aceptar el pedido específico
-        #         pedidos.aceptar_pedido_especifico(pedido_aleatorio)
+        # 1. SI ESTÁ CERCA DE PICKUP → RECOGER 
+        recogio_algo = False
 
+        for p in pedidos.obtener_todos_los_pedidos():
+            if p.esta_cerca(self.trabajadorRect, p.pickup, self.cell_size):
+                if self.inventario.peso_actual + p.weight <= self.inventario.peso_maximo:
+                    aceptado = pedidos.aceptar_pedido_especifico(p)
+                    if aceptado:
+                        if self.inventario.agregar_pedido(aceptado):
+                            p.recogido = True
+                            recogio_algo = True
+                break  # solo revisar un pedido
+
+        # 2. SI ESTÁ CERCA DE DROPOFF → ENTREGAR
+        pedidos_inv = self.inventario.todos_los_pedidos()
+
+        if pedidos_inv:
+            pedido_actual = pedidos_inv[0]
+            x_obj, y_obj = pedido_actual.dropoff
+
+            if x_actual == x_obj and y_actual == y_obj:
+                pedido_actual.verificar_interaccion(
+                    self.trabajadorRect,
+                    self.cell_size,
+                    self.inventario,
+                    self.estado,
+                    0
+                )
+                return  
+
+        # SI TIENE PEDIDOS → IR AL DROPOFF
+        if pedidos_inv:
+            pedido_actual = pedidos_inv[0]
+            x_obj, y_obj = pedido_actual.dropoff
+
+            movimientos = []
+
+            if x_obj > x_actual: movimientos.append(pygame.K_RIGHT)
+            elif x_obj < x_actual: movimientos.append(pygame.K_LEFT)
+
+            if y_obj > y_actual: movimientos.append(pygame.K_DOWN)
+            elif y_obj < y_actual: movimientos.append(pygame.K_UP)
+
+            # Intentar movimientos hacia destino
+            for tecla in movimientos:
+                if self._intento_movimiento(tecla, clima, dt, mapa):
+                    self.contador_bloqueos = 0  # se movió, reset
+                    return
+                else:
+                    self.contador_bloqueos += 1
+
+            # Si está bloqueado muchas veces, hacer escape
+            if self.contador_bloqueos >= self.max_bloqueos:
+                self.contador_bloqueos = 0
+                ruta_escape = self._calcular_escape(x_actual, y_actual, mapa)
+                if ruta_escape:
+                    mov = ruta_escape[0]
+                    self._intento_movimiento(mov, clima, dt, mapa)
+                    return
+
+            # Si no pudo, movimiento aleatorio
+            if self._mover_aleatorio(clima, dt, mapa):
+                self.contador_bloqueos = 0
+            return
+
+        # SIN PEDIDOS: MOVIMIENTO ALEATORIO SIEMPRE
+        if self._mover_aleatorio(clima, dt, mapa):
+            self.contador_bloqueos = 0
+
+    def _intento_movimiento(self, tecla, clima, dt, mapa):
+        dx, dy = 0, 0
+        if tecla == pygame.K_UP: dy = -1
+        elif tecla == pygame.K_DOWN: dy = 1
+        elif tecla == pygame.K_LEFT: dx = -1
+        elif tecla == pygame.K_RIGHT: dx = 1
+
+        prueba_rect = self.trabajadorRect.copy()
+        prueba_rect.move_ip(dx * self.cell_size, dy * self.cell_size)
+
+        if self.es_transitable(prueba_rect, mapa):
+            self.mover_una_celda(tecla, clima, dt, self.obtener_velocidad(clima, mapa), mapa)
+            return True
+        return False
+
+
+    def _mover_aleatorio(self, clima, dt, mapa):
         direcciones = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
         random.shuffle(direcciones)
 
         for tecla in direcciones:
-            prueba_rect = self.trabajadorRect.copy()
-            dx, dy = 0, 0
-
-            if tecla == pygame.K_UP:
-                dy = -1
-            elif tecla == pygame.K_DOWN:
-                dy = 1
-            elif tecla == pygame.K_LEFT:
-                dx = -1
-            elif tecla == pygame.K_RIGHT:
-                dx = 1
-
-            prueba_rect.move_ip(dx * self.cell_size, dy * self.cell_size)
-
-            if self.es_transitable(prueba_rect, mapa):
-                self.mover_una_celda(tecla, clima, dt, self.obtener_velocidad(clima, mapa), mapa)
-                break
-
-
-    
-
-
-
-
-
+            if self._intento_movimiento(tecla, clima, dt, mapa):
+                return True
+        return False
 
     def _a_estrella_matriz(self, matriz, inicio: Tuple[int, int], destino: Tuple[int, int]) -> List[Tuple[int, int]]:
         """Algoritmo A* sobre la matriz devuelta por mapa.obtener_matriz().
