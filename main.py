@@ -265,9 +265,11 @@ def main():
                         if pedidos.pedidos:
                             pedido_rechazado = pedidos.rechazar_pedido()
                             if pedido_rechazado:
-                                trabajador.estado.modificar_reputacion(-3)
-                                penalizaciones += 3 
+                                # Rechazar pedido reduce reputación (cancelación)
+                                trabajador.estado.modificar_reputacion(-5)
+                                penalizaciones += 5
                                 pedidos_tratados += 1
+                                print(f"Pedido rechazado - Reputación -5 → {trabajador.estado.reputacion}/100")
                         agregar_pasos(movimientos,pedidos.pedidos, pedidos.pedidos_aceptados, trabajador.entregados, trabajador, bono, penalizaciones)
 
                     elif event.key == pygame.K_o:
