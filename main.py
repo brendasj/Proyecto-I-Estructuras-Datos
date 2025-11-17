@@ -407,6 +407,30 @@ def main():
                                 import heapq
                                 index = len(pedidos.pedidos) + 1
                                 heapq.heappush(pedidos.pedidos, (-pedido_aceptado.priority, index, pedido_aceptado))
+                
+                # Si la IA está lo suficientemente cerca del pickup y
+                # hay capacidad en el inventario, aceptar y agregar el pedido.
+                elif pedido_pub.esta_cerca(trabajador_ia.trabajadorRect, pedido_pub.pickup, cell_size):
+                    # Comprobar capacidad de peso antes de aceptar
+                    if trabajador_ia.inventario.peso_actual + pedido_pub.weight <= trabajador_ia.inventario.peso_maximo:
+                        pedido_aceptado = pedidos.aceptar_pedido_especifico(pedido_pub)
+                        if pedido_aceptado:
+                            agregado = trabajador_ia.inventario.agregar_pedido(pedido_aceptado)
+                            if agregado:
+                                # Verificar interacción ahora que está en el inventario
+                                pedido_aceptado.verificar_interaccion(
+                                    trabajador_ia.trabajadorRect,
+                                    cell_size,
+                                    trabajador_ia.inventario,
+                                    trabajador_ia.estado,
+                                    tiempo_juego
+                                )
+                                pedidos_tratados += 1
+                            else:
+                                # Si por alguna razón no se pudo agregar, volver a insertar
+                                import heapq
+                                index = len(pedidos.pedidos) + 1
+                                heapq.heappush(pedidos.pedidos, (-pedido_aceptado.priority, index, pedido_aceptado))
 
             for pedido in trabajador.inventario.todos_los_pedidos():
                 pedido.verificar_interaccion(
@@ -414,6 +438,15 @@ def main():
                     cell_size,
                     trabajador.inventario,
                     trabajador.estado,
+                    tiempo_juego
+                )
+
+            for pedido in trabajador_ia.inventario.todos_los_pedidos():
+                pedido.verificar_interaccion(
+                    trabajador_ia.trabajadorRect,
+                    cell_size,
+                    trabajador_ia.inventario,
+                    trabajador_ia.estado,
                     tiempo_juego
                 )
 
