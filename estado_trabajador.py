@@ -6,9 +6,10 @@ class EstadoTrabajador:
         self.ingresos = 0
         self.meta = meta_ingresos
     
-    def modificar_reputacion(self,cant):
-        if self.reputacion < 100:
-            self.reputacion += cant
+    def modificar_reputacion(self, cant):
+        self.reputacion += cant
+        # Mantener reputación dentro del rango 0-100
+        self.reputacion = max(0, min(100, self.reputacion))
 
     def consumir_resistencia(self, clima, peso_actual, dt):
         base = 0.5 * dt

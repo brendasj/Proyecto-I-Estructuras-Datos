@@ -20,48 +20,33 @@ class Pedido:
         self.dropoff = dropoff
         self.weight = weight
 
-        # Normalizaremos el deadline como segundos restantes desde el inicio
-        # del juego (tiempo 0). Para ello calculamos el tiempo restante en
-        # segundos respecto al momento actual (UTC). Si la API ya entrega
-        # un número de segundos lo consideramos como tiempo restante.
+        # Sistema de tiempo relativo: cada pedido tiene 90 segundos (1.5 minutos)
+        # para ser entregado desde su release_time
         try:
-            now_utc = datetime.now(timezone.utc)
-
-            if isinstance(deadline, str):
-                # ISO string: convertir a datetime aware y calcular resto
-                raw = deadline.strip().replace("Z", "+00:00")
-                deadline_dt = datetime.fromisoformat(raw)
-                remaining = (deadline_dt - now_utc).total_seconds()
-                self.release_time = (
-                    float(release_time)
-                    if isinstance(release_time, (int, float))
-                    else 0.0
-                )
-
-            elif isinstance(deadline, (int, float)):
-                # ya es un número de segundos (tiempo restante)
-                remaining = float(deadline)
-                self.release_time = float(release_time) if isinstance(release_time, (int, float)) else 0.0
-
-            else:
-                raise ValueError("Formato de deadline no reconocido")
-
-            # Nunca guardar valores negativos: si ya pasó la hora, lo marcamos 0
-            self.deadline = max(0.0, remaining)
-
-        except Exception as e:
-            print(f"Error al convertir fechas del pedido {id}: {e}")
-            # valor por defecto: 5 minutos
-            self.deadline = 300.0
-            self.release_time = 0.0
-
-        # Cadena para mostrar (HH:MM) si se pasó un ISO original
-        try:
-            self.deadline_str = (
-                raw[11:16] if isinstance(deadline, str) and len(raw) >= 16 else "?"
+            # Convertir release_time a float
+            self.release_time = (
+                float(release_time)
+                if isinstance(release_time, (int, float))
+                else 0.0
             )
-        except NameError:
-            self.deadline_str = "?"
+            
+            # Tiempo de entrega: 90 segundos desde release_time
+            TIEMPO_ENTREGA_ESTANDAR = 90.0
+            self.deadline = self.release_time + TIEMPO_ENTREGA_ESTANDAR
+            
+        except Exception as e:
+            print(f"Error al procesar tiempos del pedido {id}: {e}")
+            # valores por defecto
+            self.release_time = 0.0
+            self.deadline = 90.0
+
+        # Cadena para mostrar el tiempo límite en formato MM:SS
+        try:
+            tiempo_limite_minutos = int(self.deadline // 60)
+            tiempo_limite_segundos = int(self.deadline % 60)
+            self.deadline_str = f"{tiempo_limite_minutos:02d}:{tiempo_limite_segundos:02d}"
+        except Exception:
+            self.deadline_str = "01:30"
 
         self.recogido = False
         self.entregado = False
@@ -88,9 +73,15 @@ class Pedido:
 
             # Evaluar puntualidad con tiempo simulado
             if tiempo_juego <= self.deadline:
-                estado.modificar_reputacion(10)
+                # Entrega puntual: aumenta reputación
+                estado.modificar_reputacion(5)
+                tiempo_restante = self.deadline - tiempo_juego
+                print(f"¡Entrega puntual! +5 reputación (sobró {tiempo_restante:.1f}s) → {estado.reputacion}/100")
             else:
-                estado.modificar_reputacion(-5)
+                # Entrega tardía: reduce reputación
+                estado.modificar_reputacion(-10)
+                tiempo_excedido = tiempo_juego - self.deadline
+                print(f"Entrega tardía -10 reputación (tardó {tiempo_excedido:.1f}s extra) → {estado.reputacion}/100")
 
             # Aplicar pago con bonus si corresponde
             pago_final = self.payout
