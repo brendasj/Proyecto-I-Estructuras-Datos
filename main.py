@@ -72,18 +72,22 @@ def agregar_pasos(mov, pedidos, aceptados, entregados, trabajador, bonos, penali
         ]
     mov.append(nuevo)
 
-def mostrar_estado_final(resultado):
+def mostrar_estado_final(resultado, razon):
     root = tk.Tk()
     root.withdraw()
 
     if resultado == "victoria":
         titulo = "VICTORIA"
-        mensaje = f"¡Felicidades! Has alcanzado la meta"
+        mensaje = f"¡Felicidades! Has alcanzado la meta, " + razon
         
         messagebox.showinfo(titulo, mensaje)
     elif resultado == "derrota":
         titulo = "DERROTA"
-        mensaje = f"Perdiste, no alcanzaste los objetivos"
+        mensaje = f"Perdiste, " + razon
+        messagebox.showinfo(titulo, mensaje)
+    elif resultado == "empate":
+        titulo = "EMPATE"
+        mensaje = f"Empate, " + razon
         messagebox.showinfo(titulo, mensaje)
     
     root.update()
@@ -197,33 +201,36 @@ def main():
         running = True
         while running:
 
-            if trabajador.estado.ingresos >= params["goal"]:
-                running = False
-                resultado_final = "victoria"
-                mostrar_estado_final(resultado_final)
-                
-            elif trabajador.estado.reputacion < 20:
+            if trabajador.estado.reputacion < 20:
                 running = False
                 resultado_final = "derrota"
-                mostrar_estado_final(resultado_final)
+                razon = "Tu reputacion es menor a 20"
+                mostrar_estado_final(resultado_final, razon)
 
-            # No terminar la partida inmediatamente si ya no quedan pedidos
-            # pendientes en la cola: es posible que el jugador (o la IA)
-            # todavía tenga pedidos en su inventario por entregar. Sólo
-            # declaramos derrota aquí si NO hay pedidos pendientes y ambos
-            # inventarios están vacíos y no se alcanzó la meta.
+
+            # Terminar la partida si ya no quedan pedidos posibles y ambos jugadores
+            # no tienen nada por entregar. Aquí no se usa la meta; se compara humano vs IA.
             elif (
-                # Sólo terminar por falta de pedidos si no hay publicados
-                # y tampoco quedan trabajos sin publicar en la fuente.
-                not pedidos.pedidos
-                and (not hasattr(pedidos, "fuente_jobs") or not pedidos.fuente_jobs)
-                and trabajador.inventario.esta_vacia()
-                # and trabajador_ia.inventario.esta_vacia()
-                and trabajador.estado.ingresos < params["goal"]
+                not pedidos.pedidos  # no hay pedidos publicados
+                and (not hasattr(pedidos, "fuente_jobs") or not pedidos.fuente_jobs)  # no hay pedidos futuros
+                and trabajador.inventario.esta_vacia()  # el humano no tiene pedidos por entregar
+                and trabajador_ia.inventario.esta_vacia()  # la IA tampoco
             ):
                 running = False
-                resultado_final = "derrota"
-                mostrar_estado_final(resultado_final)
+
+                # Comparar ingresos humanos vs IA
+                if trabajador.estado.ingresos > trabajador_ia.estado.ingresos:
+                    resultado_final = "victoria"
+                    razon = "tienes más ingresos que la IA"
+                elif trabajador.estado.ingresos < trabajador_ia.estado.ingresos:
+                    resultado_final = "derrota"
+                    razon = "tienes menos ingresos que la IA"
+                else:
+                    resultado_final = "empate"  # opcional
+                    razon = "tienes los mismos ingresos que la IA"
+
+                mostrar_estado_final(resultado_final, razon)
+
 
             dt = clock.tick(60) / 1000.0
             tiempo_juego += dt
@@ -231,11 +238,16 @@ def main():
             # Chequear límite de tiempo (derrota si no alcanza la meta)
             if tiempo_juego >= params.get("time_limit", float("inf")):
                 running = False
-                if trabajador.estado.ingresos >= params["goal"]:
+                if trabajador.estado.ingresos > trabajador_ia.estado.ingresos:
                     resultado_final = "victoria"
-                else:
+                    razon = "tienes más ingresos que la IA"
+                elif trabajador.estado.ingresos < trabajador_ia.estado.ingresos:
                     resultado_final = "derrota"
-                mostrar_estado_final(resultado_final)
+                    razon = "tienes menos ingresos que la IA"
+                else:
+                    resultado_final = "empate" 
+                    razon = "tienes los mismos ingresos que la IA"
+                mostrar_estado_final(resultado_final, razon)
 
             movio_este_ciclo = False  # ← NUEVO
 
