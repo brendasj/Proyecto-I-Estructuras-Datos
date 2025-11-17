@@ -357,6 +357,8 @@ def main():
                     trabajador_ia.estado.recuperar_resistencia(dt)
                 elif dificultad == "medio":
                     trabajador_ia.estado.recuperar_resistencia(dt)
+                elif dificultad == "dificil":
+                    trabajador_ia.estado.recuperar_resistencia(dt)
 
             # En modo difícil la IA debe decidir y moverse cada ciclo
             if dificultad == "dificil":
