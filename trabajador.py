@@ -53,6 +53,14 @@ class Trabajador:
         self._debug_ruta = []
         self._debug_enabled = False
 
+        self.plan_movimientos = []
+        self.objetivo_medio = None
+        self.cooldown_movimiento = 0 
+        self.DELAY_MOVIMIENTO = 0.2
+
+        self.historial_pos = []
+        self.max_historial = 6
+
     def es_transitable(self, rect: pygame.Rect, mapa: Any) -> bool:
         """Comprueba si el rect es transitables (no está dentro de un edificio)."""
         puntos = [
@@ -261,6 +269,14 @@ class Trabajador:
                 self.mover_una_celda(tecla, clima, dt, self.obtener_velocidad(clima, mapa), mapa)
                 break
 
+
+    
+
+
+
+
+
+
     def _a_estrella_matriz(self, matriz, inicio: Tuple[int, int], destino: Tuple[int, int]) -> List[Tuple[int, int]]:
         """Algoritmo A* sobre la matriz devuelta por mapa.obtener_matriz().
 
@@ -338,6 +354,172 @@ class Trabajador:
                     heapq.heappush(open_heap, (f, tentative_g, neigh))
 
         return []
+    
+    def nivel_medio_ia(self, clima, dt, mapa, pedidos):
+        """IA nivel medio: greedy lookahead 2-3 acciones."""
+        # Actualizar cooldown
+        if self.cooldown_movimiento > 0:
+            self.cooldown_movimiento -= dt
+            return
+
+        # PRIORIDAD 1: Entregar pedidos que ya hay
+        for pedido in self.inventario.todos_los_pedidos():
+            if pedido.recogido and not pedido.entregado:
+                x0 = int(self.trabajadorRect.centerx / self.cell_size)
+                y0 = int(self.trabajadorRect.centery / self.cell_size)
+                objetivo = pedido.dropoff
+
+                # --- CONTROL ANTI-BUCLE (DROP-OFF) ---
+                pos_actual = (x0, y0)
+                self.historial_pos.append(pos_actual)
+
+                if len(self.historial_pos) > self.max_historial:
+                    self.historial_pos.pop(0)
+
+                # Si se cumple es que esta entrando en un bucle
+                if self.historial_pos.count(pos_actual) >= 3:
+                    # Forzar escape
+                    self.plan_movimientos = self._calcular_escape(x0, y0, mapa)
+
+                # Revisa si esta cerca de la entrega
+                if pedido.esta_cerca(self.trabajadorRect, objetivo, self.cell_size):
+                    # Entregar el pedido
+                    pedido.verificar_interaccion(
+                        self.trabajadorRect,
+                        self.cell_size,
+                        self.inventario,
+                        self.estado,
+                        0
+                    )
+                    self.objetivo_medio = None
+                    self.plan_movimientos = []
+                    return
+
+                # Replanificar ruta hacia dropoff
+                if self.objetivo_medio != objetivo or not self.plan_movimientos:
+                    self.objetivo_medio = objetivo
+                    self.plan_movimientos = self._calcular_movimientos(x0, y0, objetivo, mapa)
+
+                # Ejecutar movimiento
+                if self.plan_movimientos:
+                    mov = self.plan_movimientos.pop(0)
+                    self.mover_una_celda(mov, clima, dt, self.obtener_velocidad(clima, mapa), mapa)
+                    self.cooldown_movimiento = self.DELAY_MOVIMIENTO
+                return
+
+        # PRIORIDAD 2: Recoger nuevos pedidos
+        lista = pedidos.obtener_todos_los_pedidos()
+        if not lista:
+            return
+
+        x0 = int(self.trabajadorRect.centerx / self.cell_size)
+        y0 = int(self.trabajadorRect.centery / self.cell_size)
+
+        # --- CONTROL ANTI-BUCLE ---
+        pos_actual = (x0, y0)
+        self.historial_pos.append(pos_actual)
+
+        if len(self.historial_pos) > self.max_historial:
+            self.historial_pos.pop(0)
+
+        if self.historial_pos.count(pos_actual) >= 3:
+            self.plan_movimientos = self._calcular_escape(x0, y0, mapa)
+
+        # objetivo con mejor pago
+        mejor_p = max(lista, key=lambda p: p.payout)
+        objetivo = mejor_p.pickup
+
+        if mejor_p.esta_cerca(self.trabajadorRect, objetivo, self.cell_size):
+            if self.inventario.peso_actual + mejor_p.weight <= self.inventario.peso_maximo:
+                pedido_aceptado = pedidos.aceptar_pedido_especifico(mejor_p)
+                if pedido_aceptado:
+                    agregado = self.inventario.agregar_pedido(pedido_aceptado)
+                    if agregado:
+                        pedido_aceptado.recogido = True
+            self.objetivo_medio = None
+            self.plan_movimientos = []
+            return
+
+        if self.objetivo_medio != objetivo or not self.plan_movimientos:
+            self.objetivo_medio = objetivo
+            self.plan_movimientos = self._calcular_movimientos(x0, y0, objetivo, mapa)
+
+        if self.plan_movimientos:
+            mov = self.plan_movimientos.pop(0)
+            self.mover_una_celda(mov, clima, dt, self.obtener_velocidad(clima, mapa), mapa)
+            self.cooldown_movimiento = self.DELAY_MOVIMIENTO
+   
+
+    def _calcular_movimientos(self, x0, y0, objetivo, mapa, max_depth=5):
+        """Greedy lookahead de 3 pasos usando DFS limitada."""
+        moves = [
+            (pygame.K_UP,    (0, -1)),
+            (pygame.K_DOWN,  (0, 1)),
+            (pygame.K_LEFT,  (-1, 0)),
+            (pygame.K_RIGHT, (1, 0)),
+        ]
+
+        def es_valido(nx, ny):
+            rect = self.trabajadorRect.copy()
+            rect.centerx = nx * self.cell_size
+            rect.centery = ny * self.cell_size
+            return self.es_transitable(rect, mapa)
+
+        mejor_score = float("inf")
+        mejor_secuencia = []
+
+        def dfs(px, py, depth, secuencia):
+            nonlocal mejor_score, mejor_secuencia
+
+            # ancho de búsqueda limitado
+            if depth == max_depth:
+                dist = abs(px - objetivo[0]) + abs(py - objetivo[1])
+                if dist < mejor_score:
+                    mejor_score = dist
+                    mejor_secuencia = secuencia.copy()
+                return
+
+            # expansión greedy: probar primero movimientos que acercan más
+            movs_ordenados = []
+            for key, (dx, dy) in moves:
+                nx, ny = px + dx, py + dy
+                if not es_valido(nx, ny):
+                    continue
+                d = abs(nx - objetivo[0]) + abs(ny - objetivo[1])
+                movs_ordenados.append((d, key, nx, ny))
+
+            movs_ordenados.sort(key=lambda t: t[0])
+
+            # probar hasta 3 movimientos más prometedores
+            for _, key, nx, ny in movs_ordenados[:3]:
+                dfs(nx, ny, depth + 1, secuencia + [key])
+
+        # lanzar DFS
+        dfs(x0, y0, 0, [])
+
+        return mejor_secuencia
+
+    def _calcular_escape(self, x0, y0, mapa):
+        """Salir de bucles moviendose a una celda valida aleatoria."""
+        moves = [
+            (pygame.K_UP, (0, -1)),
+            (pygame.K_DOWN, (0, 1)),
+            (pygame.K_LEFT, (-1, 0)),
+            (pygame.K_RIGHT, (1, 0)),
+        ]
+
+        random.shuffle(moves)
+
+        for key, (dx, dy) in moves:
+            nx, ny = x0 + dx, y0 + dy
+            rect = self.trabajadorRect.copy()
+            rect.centerx = nx * self.cell_size
+            rect.centery = ny * self.cell_size
+
+            if self.es_transitable(rect, mapa):
+                return [key]  # hace un movimiento para salir del bucle
+        return []
+
 
     def nivel_dificil_ia(self, clima: Any, dt: float, mapa: Any, pedidos: Any) -> None:
         """IA difícil: selecciona el pedido más cercano y usa A* para planear.
