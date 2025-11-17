@@ -593,7 +593,7 @@ class Trabajador:
             self._tiempo_ultimo_movimiento_ia = 0
         
         # Intervalo de movimiento (en segundos) - ajustar para controlar velocidad
-        intervalo_movimiento = 0.1  # La IA se mueve cada 0.1 segundos (más rápido)
+        intervalo_movimiento = 0.05  # La IA se mueve cada 0.05 segundos (más rápido que antes)
         
         self._tiempo_ultimo_movimiento_ia += dt
         if self._tiempo_ultimo_movimiento_ia < intervalo_movimiento:
