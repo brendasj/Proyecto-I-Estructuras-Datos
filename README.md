@@ -132,11 +132,11 @@ El juego termina por:
 # Mejoras Técnicas Implementadas
 Durante esta fase del proyecto se realizaron mejoras estructurales importantes que garantizan estabilidad, consistencia del tiempo de juego y compatibilidad multiplataforma.
 ## 1. Manejo de Tiempo Relativo para Entregas
-Originalmente, las entregas se evaluaban usando el tiempo real del sistema (time.time()), lo que producía errores como: 
-- pedidos marcados como “tarde” al cargar la partida
-- pedidos identificados como tardíos al iniciar el juego con retraso
+Originalmente, las entregas se evaluaban usando el tiempo real del sistema (`time.time()`), lo que producía errores como: 
+- Pedidos marcados como tarde al cargar la partida
+- Pedidos identificados como tardíos al iniciar el juego con retraso
 
-*Solución Implementada*
+### Solución Implementada
 Ahora el juego utiliza tiempo relativo interno, es decir, el tiempo empieza en 0 cuando inicia la partida, se incrementa con cada ciclo del juego (dt) y todas las comparaciones de entrega se basan en este tiempo virtual.
 
 ## 2. Crash en macOS (NSException)
@@ -145,7 +145,7 @@ En la retroalimentación del primer proyecto se brindó lo siguiente:
 
 Se le preguntó a una IA a qué se debía ese error y lo que respondió es que una de las posibles causas era por cómo se manejan los hilos de Pygame y Tkinter en macOS (Se adjunta el prompt y la respuesta en el documeento de prompts).
 
-*Solución implementada*
+### Solución Implementada
 A pesar de que ninguna de las integrantes del grupo trabaja con macOS se implementaron medidas de seguridad para tratar de evitar el crash:
 1. Verificación de existencia de ventanas con `winfo_exists()`.
 2. `try/except/finally` en todas las operaciones GUI (Tkinter + diálogos).
